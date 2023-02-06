@@ -25,7 +25,10 @@ initialise_pretrained_model(400)
 initialise_nltk()
 
 # %%
-DATA_DIR = pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables")
+DATA_DIR = [
+    pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables"),
+    pathlib.Path("home/jonathan.haas/gittables"),
+][1]
 MODEL_ID = "gittables_full"
 LEAST_TARGET_COUNT = 100 # Should not have an effect on the results for full dataset
 FEATURES_FILE_NAME = f"{MODEL_ID}_features.csv"
@@ -55,6 +58,7 @@ def _get_data_and_targets(row):
         if not _data.isnull().all():
             return str(_data.values.tolist()), row["dbpedia_semantic"]
     except Exception as e:
+        print("Exception while reading parquet file: ", _fp)
         print(e)
         return None
 
@@ -83,7 +87,17 @@ def get_data_and_targets(index_df: pd.DataFrame, n: int = 1000):
     return list(data), list(targets)
 
 
-data, targets = get_data_and_targets(_index_df.reset_index() n = 100_000_000)
+data_fp = DATA_DIR / f"{MODEL_ID}_data.parquet"
+targets_fp = DATA_DIR / f"{MODEL_ID}_targets.parquet"
+
+if data_fp.exists() and targets_fp.exists():
+    print("Loading data and targets from parquet files...")
+    data = load_parquet_values(data_fp)
+    targets = load_parquet_values(targets_fp)
+else: 
+    print("Loading data and targets from individual parquet files...")
+    data, targets = get_data_and_targets(_index_df.reset_index(), n = 100_000_000)
+
 assert len(data) == len(targets)
 
 print("Finished loading data and targets")
@@ -101,6 +115,13 @@ targets_fil_count = targets.value_counts()[targets.value_counts() > LEAST_TARGET
 idx = targets[targets.isin(targets_fil_count)].index
 targets = targets[idx]
 data = data[idx]
+
+# %%
+# store data and targets
+
+data.to_parquet(data_fp)
+targets.to_parquet(targets_fp)
+
 
 # %% 
 feature_file_name = f"../{FEATURES_FILE_NAME}"
