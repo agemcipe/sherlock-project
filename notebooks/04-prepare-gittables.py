@@ -27,7 +27,7 @@ initialise_nltk()
 # %%
 DATA_DIR = [
     pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables"),
-    pathlib.Path("home/jonathan.haas/gittables"),
+    pathlib.Path("/home/jonathan.haas/gittables"),
 ][1]
 MODEL_ID = "gittables_full"
 LEAST_TARGET_COUNT = 100 # Should not have an effect on the results for full dataset
@@ -87,40 +87,37 @@ def get_data_and_targets(index_df: pd.DataFrame, n: int = 1000):
     return list(data), list(targets)
 
 
-data_fp = DATA_DIR / f"{MODEL_ID}_data.parquet"
-targets_fp = DATA_DIR / f"{MODEL_ID}_targets.parquet"
+data_fp = DATA_DIR / f"{MODEL_ID}_data.csv"
+targets_fp = DATA_DIR / f"{MODEL_ID}_targets.csv"
 
 if data_fp.exists() and targets_fp.exists():
     print("Loading data and targets from parquet files...")
-    data = load_parquet_values(data_fp)
-    targets = load_parquet_values(targets_fp)
+    data = pd.read_csv(data_fp)
+    targets = pd.read_csv(targets_fp)
 else: 
     print("Loading data and targets from individual parquet files...")
     data, targets = get_data_and_targets(_index_df.reset_index(), n = 100_000_000)
 
-assert len(data) == len(targets)
+    assert len(data) == len(targets)
 
-print("Finished loading data and targets")
-print(len(data))
+    print("Finished loading data and targets")
+    print(len(data))
 
-raw_data = data
-raw_targets = targets
-    
-# %% 
-data = pd.Series(raw_data, name="values")
-targets = pd.Series(raw_targets, name="labels")
+    raw_data = data
+    raw_targets = targets
+        
+    data = pd.Series(raw_data, name="values")
+    targets = pd.Series(raw_targets, name="labels")
 
-targets_fil_count = targets.value_counts()[targets.value_counts() > LEAST_TARGET_COUNT].index
+    targets_fil_count = targets.value_counts()[targets.value_counts() > LEAST_TARGET_COUNT].index
 
-idx = targets[targets.isin(targets_fil_count)].index
-targets = targets[idx]
-data = data[idx]
+    idx = targets[targets.isin(targets_fil_count)].index
+    targets = targets[idx]
+    data = data[idx]
 
-# %%
-# store data and targets
 
-data.to_parquet(data_fp)
-targets.to_parquet(targets_fp)
+    data.to_csv(data_fp, index=False)
+    targets.to_csv(targets_fp, index=False)
 
 
 # %% 
