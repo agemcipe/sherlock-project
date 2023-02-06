@@ -89,37 +89,37 @@ def main():
         raise FileNotFoundError()
 
 
-data_fp = DATA_DIR / f"{MODEL_ID}_data.csv"
-targets_fp = DATA_DIR / f"{MODEL_ID}_targets.csv"
+    data_fp = DATA_DIR / f"{MODEL_ID}_data.csv"
+    targets_fp = DATA_DIR / f"{MODEL_ID}_targets.csv"
 
-if data_fp.exists() and targets_fp.exists():
-    print("Loading data and targets from parquet files...")
-    data = pd.read_csv(data_fp)
-    targets = pd.read_csv(targets_fp)
-else: 
-    print("Loading data and targets from individual parquet files...")
-    data, targets = get_data_and_targets(_index_df.reset_index(), n = 100_000_000)
-
-    assert len(data) == len(targets)
-
-    print("Finished loading data and targets")
-    print(len(data))
-
-    raw_data = data
-    raw_targets = targets
+    if data_fp.exists() and targets_fp.exists():
+        print("Loading data and targets from parquet files...")
+        data = pd.read_csv(data_fp)
+        targets = pd.read_csv(targets_fp)
+    else: 
+        print("Loading data and targets from individual parquet files...")
+        data, targets = get_data_and_targets(_index_df.reset_index(), n = 100_000_000)
         
-    data = pd.Series(raw_data, name="values")
-    targets = pd.Series(raw_targets, name="labels")
+        assert len(data) == len(targets)
 
-    targets_fil_count = targets.value_counts()[targets.value_counts() > LEAST_TARGET_COUNT].index
+        print("Finished loading data and targets")
+        print(len(data))
 
-    idx = targets[targets.isin(targets_fil_count)].index
-    targets = targets[idx]
-    data = data[idx]
+        raw_data = data
+        raw_targets = targets
+            
+        data = pd.Series(raw_data, name="values")
+        targets = pd.Series(raw_targets, name="labels")
+
+        targets_fil_count = targets.value_counts()[targets.value_counts() > LEAST_TARGET_COUNT].index
+
+        idx = targets[targets.isin(targets_fil_count)].index
+        targets = targets[idx]
+        data = data[idx]
 
 
-    data.to_csv(data_fp, index=False)
-    targets.to_csv(targets_fp, index=False)
+        data.to_csv(data_fp, index=False)
+        targets.to_csv(targets_fp, index=False)
 
     # %% 
     feature_file_name = f"../{FEATURES_FILE_NAME}"
@@ -163,7 +163,7 @@ else:
     # %%
     t = model.predict(X_test, model_id=MODEL_ID)
     print("Test Acc.", sum(t == y_test) / len(y_test))
-    
+
 # %%
 if __name__ == "__main__":
     main()
