@@ -33,22 +33,6 @@ MODEL_ID = "gittables_full"
 LEAST_TARGET_COUNT = 100 # Should not have an effect on the results for full dataset
 FEATURES_FILE_NAME = f"{MODEL_ID}_features.csv"
 
-ont_file = DATA_DIR / "dbpedia_semantic_types_filtered_1000.csv"
-index_file = DATA_DIR / "mapping_column_name_semantic_type.csv"
-
-# %%
-ont_df = pd.read_csv(ont_file)
-index_df = pd.read_csv(index_file)
-# %%
-index_df = index_df[index_df["dbpedia_semantic"].isin(ont_df["id"])]
-
-# %%
-_local_dirs = [d.name for d in  (DATA_DIR / "unzipped").glob("*")]
-if _local_dirs:
-    _index_df = index_df[index_df["file_name"].str.startswith(tuple(_local_dirs))]
-else:
-    print("No local dirs found")
-    raise FileNotFoundError()
 # %% 
 def _get_data_and_targets(row):
     row = row[1]
@@ -86,6 +70,24 @@ def get_data_and_targets(index_df: pd.DataFrame, n: int = 1000):
     data, targets = tuple(zip(*res))
     return list(data), list(targets)
 
+def main():
+    ont_file = DATA_DIR / "dbpedia_semantic_types_filtered_1000.csv"
+    index_file = DATA_DIR / "mapping_column_name_semantic_type.csv"
+
+    # %%
+    ont_df = pd.read_csv(ont_file)
+    index_df = pd.read_csv(index_file)
+    # %%
+    index_df = index_df[index_df["dbpedia_semantic"].isin(ont_df["id"])]
+
+    # %%
+    _local_dirs = [d.name for d in  (DATA_DIR / "unzipped").glob("*")]
+    if _local_dirs:
+        _index_df = index_df[index_df["file_name"].str.startswith(tuple(_local_dirs))]
+    else:
+        print("No local dirs found")
+        raise FileNotFoundError()
+
 
 data_fp = DATA_DIR / f"{MODEL_ID}_data.csv"
 targets_fp = DATA_DIR / f"{MODEL_ID}_targets.csv"
@@ -119,47 +121,49 @@ else:
     data.to_csv(data_fp, index=False)
     targets.to_csv(targets_fp, index=False)
 
+    # %% 
+    feature_file_name = f"../{FEATURES_FILE_NAME}"
+    extract_features_to_csv(output_path=feature_file_name, parquet_values=data)
 
-# %% 
-feature_file_name = f"../{FEATURES_FILE_NAME}"
-extract_features_to_csv(output_path=feature_file_name, parquet_values=data)
+    # %% 
+    feature_vectors = pd.read_csv(feature_file_name, dtype=np.float32)
 
-# %% 
-feature_vectors = pd.read_csv(feature_file_name, dtype=np.float32)
+    # %%
+    X_train, X_test, y_train, y_test = train_test_split(feature_vectors, targets, test_size=0.1, random_state=41, stratify=targets)
+    X_train, X_validation, y_train, y_validation = train_test_split(feature_vectors, targets, test_size=0.2, random_state=41, stratify=targets)
 
+    print(f"Train size: {len(X_train)}")
+    print(f"Validation size: {len(X_validation)}")
+    print(f"Distinct labels in train: {len(set(y_train))}")
+
+    columns_with_na_values = X_train.columns[X_train.isna().any()]
+    print("Columns with NA values:", columns_with_na_values)
+
+    # %%
+    # impute NA values with means
+    train_columns_means = pd.DataFrame(X_train.mean()).transpose()
+
+    # %%
+    print("Imputing NA values with means...")
+    X_train = X_train.fillna(train_columns_means.iloc[0])
+    X_validation = X_validation.fillna(train_columns_means.iloc[0]) # is this right using train mean?
+
+    # %%
+    start = datetime.now()
+    print(f'Started at {start}')
+
+    model = SherlockModel()
+    # Model will be stored with ID `model_id`
+    model.fit(X_train, y_train, X_validation, y_validation, model_id=MODEL_ID)
+
+    print('Trained and saved new model.')
+    print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
+
+    model.store_weights(model_id=MODEL_ID)
+    # %%
+    t = model.predict(X_test, model_id=MODEL_ID)
+    print("Test Acc.", sum(t == y_test) / len(y_test))
+    
 # %%
-X_train, X_test, y_train, y_test = train_test_split(feature_vectors, targets, test_size=0.1, random_state=41, stratify=targets)
-X_train, X_validation, y_train, y_validation = train_test_split(feature_vectors, targets, test_size=0.2, random_state=41, stratify=targets)
-
-print(f"Train size: {len(X_train)}")
-print(f"Validation size: {len(X_validation)}")
-print(f"Distinct labels in train: {len(set(y_train))}")
-
-columns_with_na_values = X_train.columns[X_train.isna().any()]
-print("Columns with NA values:", columns_with_na_values)
-
-# %%
-# impute NA values with means
-train_columns_means = pd.DataFrame(X_train.mean()).transpose()
-
-# %%
-print("Imputing NA values with means...")
-X_train = X_train.fillna(train_columns_means.iloc[0])
-X_validation = X_validation.fillna(train_columns_means.iloc[0]) # is this right using train mean?
-
-# %%
-start = datetime.now()
-print(f'Started at {start}')
-
-model = SherlockModel()
-# Model will be stored with ID `model_id`
-model.fit(X_train, y_train, X_validation, y_validation, model_id=MODEL_ID)
-
-print('Trained and saved new model.')
-print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
-
-model.store_weights(model_id=MODEL_ID)
-# %%
-t = model.predict(X_test, model_id=MODEL_ID)
-print("Test Acc.", sum(t == y_test) / len(y_test))
-# %%
+if __name__ == "__main__":
+    main()
