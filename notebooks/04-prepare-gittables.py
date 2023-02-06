@@ -83,10 +83,11 @@ def get_data_and_targets(index_df: pd.DataFrame, n: int = 1000):
     return list(data), list(targets)
 
 
-data, targets = get_data_and_targets(_index_df.reset_index())
+data, targets = get_data_and_targets(_index_df.reset_index() n = 100_000_000)
 assert len(data) == len(targets)
 
-print(len(data), len(targets))
+print("Finished loading data and targets")
+print(len(data))
 
 raw_data = data
 raw_targets = targets
