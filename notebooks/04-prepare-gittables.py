@@ -122,7 +122,7 @@ def main():
         print(f"Extracting features in batches of {batch_size}")
         for i in range(0, len(data), batch_size):
             print("Extracting features for batch", i, "to", i+batch_size)
-            _fp = DATA_DIR = BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
+            _fp = DATA_DIR / BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
             data_batch = data[i:i+batch_size]
             extract_features_to_csv(output_path=str(_fp), parquet_values=data_batch)
         
@@ -130,7 +130,7 @@ def main():
         print("Concatenating batches")
         with open(BASE_FEATURES_FILE_PATH, "w") as outfile:
             for i in tqdm.tqdm(range(0, len(data), batch_size)):
-                _fp = BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
+                _fp = DATA_DIR / BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
                 with open(_fp, "r") as infile:
                     outfile.write(infile.read())
     # %% 
