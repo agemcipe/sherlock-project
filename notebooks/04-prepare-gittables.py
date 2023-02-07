@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 import pathlib
 from tqdm.contrib.concurrent import process_map
+import tqdm
 
 # %% 
 from sherlock.deploy.model import SherlockModel
@@ -123,16 +124,16 @@ def main():
     batch_size = 10000
     if not BASE_FEATURES_FILE_PATH.exists():
         # batching is necessary because of memory constraints
-        for i in range(0, len(data), batch_size):
+        print(f"Extracting features in batches of {batch_size}")
+        for i in tqdm.tqdm(range(0, len(data), batch_size),):
             _fp = BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
-            print(f"Extracting features for batch {i} to {i+batch_size}")
             data_batch = data[i:i+batch_size]
             extract_features_to_csv(output_path=str(_fp), parquet_values=data_batch)
         
         # concat all batches
         print("Concatenating batches")
-        with open(BASE_FEATURES_FILE_PATH, "a") as outfile:
-            for i in range(0, len(data), batch_size):
+        with open(BASE_FEATURES_FILE_PATH, "w") as outfile:
+            for i in tqdm.tqdm(range(0, len(data), batch_size)):
                 _fp = BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
                 with open(_fp, "r") as infile:
                     outfile.write(infile.read())
