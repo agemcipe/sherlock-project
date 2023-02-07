@@ -117,7 +117,7 @@ def main():
     assert len(data) == len(targets)
 
     print("Finished loading data and targets")
-    print(len(data))
+    print("Number of Rows", len(data))
     # %% 
     BASE_FEATURES_FILE_PATH = DATA_DIR / BASE_FEATURES_FILE_NAME.format(
         model_id=MODEL_ID, batch_id="")
@@ -125,8 +125,9 @@ def main():
     if not BASE_FEATURES_FILE_PATH.exists():
         # batching is necessary because of memory constraints
         print(f"Extracting features in batches of {batch_size}")
-        for i in tqdm.tqdm(range(0, len(data), batch_size),):
-            _fp = BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
+        for i in range(0, len(data), batch_size):
+            print("Extracting features for batch", i, "to", i+batch_size)
+            _fp = DATA_DIR = BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
             data_batch = data[i:i+batch_size]
             extract_features_to_csv(output_path=str(_fp), parquet_values=data_batch)
         
