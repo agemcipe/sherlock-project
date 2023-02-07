@@ -131,8 +131,15 @@ def main():
         with open(BASE_FEATURES_FILE_PATH, "w") as outfile:
             for i in tqdm.tqdm(range(0, len(data), batch_size)):
                 _fp = DATA_DIR / BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
-                with open(_fp, "r") as infile:
-                    outfile.write(infile.read())
+                if i == 0: 
+                    with open(_fp, "r") as infile:
+                        outfile.write(infile.read())
+                else:
+                    with open(_fp, "r") as infile:
+                        next(infile)
+                        outfile.write(infile.read())
+    
+    pd.read_csv()
     # %% 
     feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32)
 
