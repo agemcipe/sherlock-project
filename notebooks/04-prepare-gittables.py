@@ -20,12 +20,6 @@ from sherlock.features.word_embeddings import initialise_word_embeddings
 from sklearn.model_selection import train_test_split
 
 # %%
-prepare_feature_extraction()
-initialise_word_embeddings()
-initialise_pretrained_model(400)
-initialise_nltk()
-
-# %%
 DATA_DIR = [
     pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables"),
     pathlib.Path("/home/jonathan.haas/gittables"),
@@ -72,6 +66,7 @@ def get_data_and_targets(index_df: pd.DataFrame, n: int = 1000):
     return list(data), list(targets)
 
 def main():
+
     ont_file = DATA_DIR / "dbpedia_semantic_types_filtered_1000.csv"
     index_file = DATA_DIR / "mapping_column_name_semantic_type.csv"
 
@@ -179,4 +174,8 @@ def main():
 
 # %%
 if __name__ == "__main__":
+    prepare_feature_extraction()
+    initialise_word_embeddings()
+    initialise_pretrained_model(400)
+    initialise_nltk()
     main()
