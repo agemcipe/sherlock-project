@@ -31,14 +31,14 @@ DATA_DIR = [
 ][1]
 MODEL_ID = "gittables_full"
 LEAST_TARGET_COUNT = 100 # Should not have an effect on the results for full dataset
-FEATURES_FILE_NAME = f"{MODEL_ID}_features.csv"
+BASE_FEATURES_FILE_NAME = "{model_id}_features{batch_id}.csv"
 
 # %% 
 def _get_data_and_targets(row):
     row = row[1]
     _fp = DATA_DIR / "unzipped" / row["file_name"]
     try:
-        _data = pd.read_parquet(_fp)[row["column_name"]]
+        _data = pd.read_parquet(_fp, engine="fastparquet")[row["column_name"]]
         if not _data.isnull().all():
             return str(_data.values.tolist()), row["dbpedia_semantic"]
     except Exception as e:
@@ -63,7 +63,7 @@ def get_data_and_targets(index_df: pd.DataFrame, n: int = 1000):
     print("Total:", total)
 
     res = process_map(
-        _get_data_and_targets, it(), total=total
+        _get_data_and_targets, it(), total=total, max_workers=16, chunksize=1000
     )
 
     res = [r for r in res if r is not None]
@@ -94,22 +94,14 @@ def main():
 
     if data_fp.exists() and targets_fp.exists():
         print("Loading data and targets from parquet files...")
-        data = pd.read_csv(data_fp)
+        data = pd.read_csv(data_fp)["values"].astype(str)
         targets = pd.read_csv(targets_fp)
     else: 
         print("Loading data and targets from individual parquet files...")
         data, targets = get_data_and_targets(_index_df.reset_index(), n = 100_000_000)
         
-        assert len(data) == len(targets)
-
-        print("Finished loading data and targets")
-        print(len(data))
-
-        raw_data = data
-        raw_targets = targets
-            
-        data = pd.Series(raw_data, name="values")
-        targets = pd.Series(raw_targets, name="labels")
+        data = pd.Series(data, name="values")
+        targets = pd.Series(targets, name="labels")
 
         targets_fil_count = targets.value_counts()[targets.value_counts() > LEAST_TARGET_COUNT].index
 
@@ -121,12 +113,31 @@ def main():
         data.to_csv(data_fp, index=False)
         targets.to_csv(targets_fp, index=False)
 
-    # %% 
-    feature_file_name = f"../{FEATURES_FILE_NAME}"
-    extract_features_to_csv(output_path=feature_file_name, parquet_values=data)
+    assert len(data) == len(targets)
 
+    print("Finished loading data and targets")
+    print(len(data))
     # %% 
-    feature_vectors = pd.read_csv(feature_file_name, dtype=np.float32)
+    BASE_FEATURES_FILE_PATH = DATA_DIR / BASE_FEATURES_FILE_NAME.format(
+        model_id=MODEL_ID, batch_id="")
+    batch_size = 10000
+    if not BASE_FEATURES_FILE_PATH.exists():
+        # batching is necessary because of memory constraints
+        for i in range(0, len(data), batch_size):
+            _fp = BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
+            print(f"Extracting features for batch {i} to {i+batch_size}")
+            data_batch = data[i:i+batch_size]
+            extract_features_to_csv(output_path=str(_fp), parquet_values=data_batch)
+        
+        # concat all batches
+        print("Concatenating batches")
+        with open(BASE_FEATURES_FILE_PATH, "a") as outfile:
+            for i in range(0, len(data), batch_size):
+                _fp = BASE_FEATURES_FILE_NAME.format(model_id=MODEL_ID, batch_id=f"_{i}")
+                with open(_fp, "r") as infile:
+                    outfile.write(infile.read())
+    # %% 
+    feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32)
 
     # %%
     X_train, X_test, y_train, y_test = train_test_split(feature_vectors, targets, test_size=0.1, random_state=41, stratify=targets)
