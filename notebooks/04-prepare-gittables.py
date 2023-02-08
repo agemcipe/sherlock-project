@@ -142,7 +142,7 @@ def main():
     
     # %% 
     targets = pd.read_csv(targets_fp)["labels"].values
-    feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32, skiprows=rows_to_skip)
+    feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32)
 
     print("Length of feature vectors:", len(feature_vectors))
     print("Length of targets:", len(targets))
