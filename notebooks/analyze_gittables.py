@@ -21,7 +21,7 @@ from sherlock.deploy.model import SherlockModel
 # %% 
 DATA_DIR = [
     pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables"),
-    pathlib.Path("/home/jonathan.haas/gittables"),
+    pathlib.Path("/home/jonathan.haas/master_thesis/data/gittables"),
 ][1]
 MODEL_ID = "gittables_full"
 
