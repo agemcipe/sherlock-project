@@ -149,7 +149,7 @@ def main():
     
     # %%
     X_train, X_test, y_train, y_test = train_test_split(feature_vectors, targets, test_size=0.1, random_state=41, stratify=targets)
-    X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=0.2, random_state=41, stratify=targets)
+    X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=0.2, random_state=41, stratify=y_train)
 
     print(f"Train size: {len(X_train)}")
     print(f"Validation size: {len(X_validation)}")
