@@ -17,11 +17,11 @@ from sherlock.features.preprocessing import (
     load_parquet_values,
 )
 from sherlock.features.word_embeddings import initialise_word_embeddings
-from sklearn.model_selection import train_test_split , StratifiedShuffleSplit
+from sklearn.model_selection import train_test_split  
 # %%
 DATA_DIR = [
     pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables"),
-    pathlib.Path("/home/jonathan.haas/gittables"),
+    pathlib.Path("/home/jonathan.haas/master_thesis/data/gittables"),
 ][1]
 MODEL_ID = "gittables_full"
 LEAST_TARGET_COUNT = 100 # Should not have an effect on the results for full dataset
@@ -141,42 +141,47 @@ def main():
                         outfile.write(infile.read())
     
     # %% 
-    num_data = 100_000
-
-    targets = pd.read_csv(targets_fp)
-    # sample targets in a stratified way
-    ssc = StratifiedShuffleSplit(n_splits=1, train_size=num_data, random_state=41)
-    idx,_ = ssc.split(targets, targets)
-
-    rows_to_skip = [False if i in idx else True for i in range(len(targets))]
-    targets = targets[idx]
+    targets = pd.read_csv(targets_fp)["labels"].values
     feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32, skiprows=rows_to_skip)
+
     print("Length of feature vectors:", len(feature_vectors))
     print("Length of targets:", len(targets))
     
     # %%
     X_train, X_test, y_train, y_test = train_test_split(feature_vectors, targets, test_size=0.1, random_state=41, stratify=targets)
-    X_train, X_validation, y_train, y_validation = train_test_split(feature_vectors, targets, test_size=0.2, random_state=41, stratify=targets)
+    X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train, test_size=0.2, random_state=41, stratify=targets)
 
     print(f"Train size: {len(X_train)}")
     print(f"Validation size: {len(X_validation)}")
-    print(f"Distinct labels in train: {len(set(y_train))}")
+    print(f"Distinct labels in train: {len(np.unique(y_train))}")
 
-    columns_with_na_values = X_train.columns[X_train.isna().any()]
-    print("Columns with NA values:", columns_with_na_values)
 
     # %%
+    columns_with_na_values = X_train.columns[X_train.isna().any()]
+    print("Columns with NA values:", columns_with_na_values)
     # impute NA values with means
     train_columns_means = pd.DataFrame(X_train.mean()).transpose()
 
-    # %%
     print("Imputing NA values with means...")
     X_train = X_train.fillna(train_columns_means.iloc[0])
     X_validation = X_validation.fillna(train_columns_means.iloc[0]) # is this right using train mean?
 
+    # %% 
+    # store data as .parquet files
+    print("Storing data as parquet files...")
+    X_train.to_parquet(DATA_DIR / f'{MODEL_ID}_X_train.parquet', engine='pyarrow', compression='snappy')
+    pd.DataFrame(y_train, columns="label").to_parquet(DATA_DIR / f'{MODEL_ID}_y_train.parquet', engine='pyarrow', compression='snappy')
+
+    X_validation.to_parquet(DATA_DIR / f'{MODEL_ID}_X_validation.parquet', engine='pyarrow', compression='snappy')
+    pd.DataFrame(y_validation, columns="label").to_parquet(DATA_DIR / f'{MODEL_ID}_y_validation.parquet', engine='pyarrow', compression='snappy')
+
+    X_test.to_parquet(DATA_DIR / f'{MODEL_ID}_X_test.parquet', engine='pyarrow', compression='snappy')
+    pd.DataFrame(y_test, columns="label").to_parquet(DATA_DIR / f'{MODEL_ID}_y_test.parquet', engine='pyarrow', compression='snappy')
+
+
     # %%
     start = datetime.now()
-    print(f'Started at {start}')
+    print(f'Started Model Training at {start}')
 
     model = SherlockModel()
     # Model will be stored with ID `model_id`
