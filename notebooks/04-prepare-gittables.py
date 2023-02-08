@@ -17,8 +17,7 @@ from sherlock.features.preprocessing import (
     load_parquet_values,
 )
 from sherlock.features.word_embeddings import initialise_word_embeddings
-from sklearn.model_selection import train_test_split
-
+from sklearn.model_selection import train_test_split , StratifiedShuffleSplit
 # %%
 DATA_DIR = [
     pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables"),
@@ -88,36 +87,38 @@ def main():
     data_fp = DATA_DIR / f"{MODEL_ID}_data.csv"
     targets_fp = DATA_DIR / f"{MODEL_ID}_targets.csv"
 
-    if data_fp.exists() and targets_fp.exists():
-        print("Loading data and targets from parquet files...")
-        data = pd.read_csv(data_fp)["values"].astype(str)
-        targets = pd.read_csv(targets_fp)
-    else: 
-        print("Loading data and targets from individual parquet files...")
-        data, targets = get_data_and_targets(_index_df.reset_index(), n = 100_000_000)
-        
-        data = pd.Series(data, name="values")
-        targets = pd.Series(targets, name="labels")
-
-        targets_fil_count = targets.value_counts()[targets.value_counts() > LEAST_TARGET_COUNT].index
-
-        idx = targets[targets.isin(targets_fil_count)].index
-        targets = targets[idx]
-        data = data[idx]
-
-
-        data.to_csv(data_fp, index=False)
-        targets.to_csv(targets_fp, index=False)
-
-    assert len(data) == len(targets)
-
-    print("Finished loading data and targets")
-    print("Number of Rows", len(data))
-    # %% 
     BASE_FEATURES_FILE_PATH = DATA_DIR / BASE_FEATURES_FILE_NAME.format(
         model_id=MODEL_ID, batch_id="")
     batch_size = 10000
+    
+    # TODO: make sure to load targets as well
     if not BASE_FEATURES_FILE_PATH.exists():
+        if data_fp.exists() and targets_fp.exists():
+            print("Loading data and targets from parquet files...")
+            data = pd.read_csv(data_fp)["values"].astype(str)
+            targets = pd.read_csv(targets_fp)
+        else: 
+            print("Loading data and targets from individual parquet files...")
+            data, targets = get_data_and_targets(_index_df.reset_index(), n = 100_000_000)
+            
+            data = pd.Series(data, name="values")
+            targets = pd.Series(targets, name="labels")
+
+            targets_fil_count = targets.value_counts()[targets.value_counts() > LEAST_TARGET_COUNT].index
+
+            idx = targets[targets.isin(targets_fil_count)].index
+            targets = targets[idx]
+            data = data[idx]
+
+
+            data.to_csv(data_fp, index=False)
+            targets.to_csv(targets_fp, index=False)
+
+        assert len(data) == len(targets)
+
+        print("Finished loading data and targets")
+        print("Number of Rows", len(data))
+    
         # batching is necessary because of memory constraints
         print(f"Extracting features in batches of {batch_size}")
         for i in range(0, len(data), batch_size):
@@ -139,10 +140,20 @@ def main():
                         next(infile)
                         outfile.write(infile.read())
     
-    pd.read_csv()
     # %% 
-    feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32)
+    num_data = 100_000
 
+    targets = pd.read_csv(targets_fp)
+    # sample targets in a stratified way
+    ssc = StratifiedShuffleSplit(n_splits=1, train_size=num_data, random_state=41)
+    idx,_ = ssc.split(targets, targets)
+
+    rows_to_skip = [False if i in idx else True for i in range(len(targets))]
+    targets = targets[idx]
+    feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32, skiprows=rows_to_skip)
+    print("Length of feature vectors:", len(feature_vectors))
+    print("Length of targets:", len(targets))
+    
     # %%
     X_train, X_test, y_train, y_test = train_test_split(feature_vectors, targets, test_size=0.1, random_state=41, stratify=targets)
     X_train, X_validation, y_train, y_validation = train_test_split(feature_vectors, targets, test_size=0.2, random_state=41, stratify=targets)
