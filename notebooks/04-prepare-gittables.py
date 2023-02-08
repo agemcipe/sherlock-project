@@ -170,13 +170,13 @@ def main():
     # store data as .parquet files
     print("Storing data as parquet files...")
     X_train.to_parquet(DATA_DIR / f'{MODEL_ID}_X_train.parquet', engine='pyarrow', compression='snappy')
-    pd.DataFrame(y_train, columns="label").to_parquet(DATA_DIR / f'{MODEL_ID}_y_train.parquet', engine='pyarrow', compression='snappy')
+    pd.DataFrame(y_train, columns=["label"]).to_parquet(DATA_DIR / f'{MODEL_ID}_y_train.parquet', engine='pyarrow', compression='snappy')
 
     X_validation.to_parquet(DATA_DIR / f'{MODEL_ID}_X_validation.parquet', engine='pyarrow', compression='snappy')
-    pd.DataFrame(y_validation, columns="label").to_parquet(DATA_DIR / f'{MODEL_ID}_y_validation.parquet', engine='pyarrow', compression='snappy')
+    pd.DataFrame(y_validation, columns=["label"]).to_parquet(DATA_DIR / f'{MODEL_ID}_y_validation.parquet', engine='pyarrow', compression='snappy')
 
     X_test.to_parquet(DATA_DIR / f'{MODEL_ID}_X_test.parquet', engine='pyarrow', compression='snappy')
-    pd.DataFrame(y_test, columns="label").to_parquet(DATA_DIR / f'{MODEL_ID}_y_test.parquet', engine='pyarrow', compression='snappy')
+    pd.DataFrame(y_test, columns=["label"]).to_parquet(DATA_DIR / f'{MODEL_ID}_y_test.parquet', engine='pyarrow', compression='snappy')
 
 
     # %%
