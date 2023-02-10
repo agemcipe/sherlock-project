@@ -8,11 +8,11 @@ from ast import literal_eval
 from collections import Counter
 from datetime import datetime
 import pathlib
-
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from sklearn.metrics import f1_score, classification_report
+from sklearn.metrics import f1_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 
 from sherlock.deploy.model import SherlockModel
 
@@ -22,7 +22,8 @@ from sherlock.deploy.model import SherlockModel
 DATA_DIR = [
     pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables"),
     pathlib.Path("/home/jonathan.haas/master_thesis/data/gittables"),
-][1]
+    pathlib.Path("../"),
+][2]
 MODEL_ID = "gittables_full"
 
 # %%
@@ -70,7 +71,7 @@ print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
 start = datetime.now()
 print(f'Started at {start}')
 
-model = SherlockModel();
+model = SherlockModel()
 model.initialize_model_from_json(with_weights=True, model_id=MODEL_ID);
 
 print('Initialized model.')
@@ -80,7 +81,7 @@ print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
 # ### Make prediction
 
 # %%
-predicted_labels = model.predict(X_test)
+predicted_labels = model.predict(X_test, MODEL_ID)
 # predicted_labels = np.array([x.lower() for x in predicted_labels])
 
 # %%
@@ -108,33 +109,42 @@ class_scores = sorted(class_scores, key=lambda item: item[1]['f1-score'], revers
 # %%
 print(f"\t\tf1-score\tprecision\trecall\t\tsupport")
 
+l = []
 for key, value in class_scores[0:5]:
-    if len(key) >= 8:
-        tabs = '\t' * 1
-    else:
-        tabs = '\t' * 2
+    l.append({**{"semantic_type": key}, **value})
 
-    print(f"{key}{tabs}{value['f1-score']:.3f}\t\t{value['precision']:.3f}\t\t{value['recall']:.3f}\t\t{value['support']}")
-
+df = pd.DataFrame(l)
+df = df[["semantic_type", "precision", "recall", "f1-score", "support"]]
+df
 # %% [markdown]
 # ### Bottom 5 Types
 
 # %%
 print(f"\t\tf1-score\tprecision\trecall\t\tsupport")
 
-for key, value in class_scores[len(class_scores)-5:len(class_scores)]:
-    if len(key) >= 8:
-        tabs = '\t' * 1
-    else:
-        tabs = '\t' * 2
+l = []
+for key, value in class_scores[-5:]:
+    l.append({**{"semantic_type": key}, **value})
 
-    print(f"{key}{tabs}{value['f1-score']:.3f}\t\t{value['precision']:.3f}\t\t{value['recall']:.3f}\t\t{value['support']}")
-
+df = pd.DataFrame(l)
+df = df[["semantic_type", "precision", "recall", "f1-score", "support"]]
+df 
 # %% [markdown]
 # ### All Scores
 
 # %%
 print(classification_report(y_test, predicted_labels, digits=3))
+
+# %% [markdown]
+# ## Review errors
+fig, ax = plt.subplots(figsize=(20, 20))
+classes_short = [s.replace("http://dbpedia.org/ontology/", "") for s in classes]
+classes_short = classes
+cfm = confusion_matrix(y_test , predicted_labels, labels=list(classes_short), normalize='true')
+# _cfm = (cfm > 0).astype(int) 
+_cfm = cfm
+dist = ConfusionMatrixDisplay(confusion_matrix=_cfm, display_labels=list(classes_short), )
+dist.plot(ax=ax, xticks_rotation='vertical', include_values=False, cmap='Blues', values_format='d')
 
 # %% [markdown]
 # ## Review errors
