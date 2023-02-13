@@ -220,7 +220,9 @@ def main():
         y_pred = model.predict(X_test, model_id=MODEL_ID)
         print("Test Acc.", sum(y_pred == y_test) / len(y_test))
         run.log_metric("Test Accuracy", accuracy_score(y_test, y_pred))
-
+        
+        with open( DATA_DIR / f"{MODEL_ID}_model.json", "w") as f_model:
+            f_model.write(model.model.to_json())
 # %%
 if __name__ == "__main__":
     prepare_feature_extraction()
