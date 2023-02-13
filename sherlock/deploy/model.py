@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import mlflow
 
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.callbacks import EarlyStopping
@@ -27,8 +28,12 @@ class SherlockModel:
         self.model_files_directory = "../model_files/"
 
     def fit(
-        self, X_train: pd.DataFrame, y_train, X_val: pd.DataFrame, y_val, model_id: str
+        self, X_train: pd.DataFrame, y_train, X_val: pd.DataFrame, y_val, model_id: str, active_run: mlflow.ActiveRun = None
     ):
+        if active_run:
+            mlflow.set_tag("model_id", model_id)
+            mlflow.keras.autolog()
+            
         if model_id == "sherlock":
             raise ValueError(
                 "`model_id` cannot be `sherlock` to avoid overwriting the original model weights."

@@ -5,6 +5,7 @@ from datetime import datetime
 import pathlib
 from tqdm.contrib.concurrent import process_map
 import tqdm
+import mlflow
 
 # %% 
 from sherlock.deploy.model import SherlockModel
@@ -18,15 +19,36 @@ from sherlock.features.preprocessing import (
 )
 from sherlock.features.word_embeddings import initialise_word_embeddings
 from sklearn.model_selection import train_test_split  
+from sklearn.metrics import accuracy_score
+
+
 # %%
-DATA_DIR = [
-    pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/semanum/data/gittables"),
-    pathlib.Path("/home/jonathan.haas/master_thesis/data/gittables"),
-][1]
+BASE_DIR_OPT = [
+    pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/"),
+    pathlib.Path("/home/jonathan.haas/master_thesis/"),
+]
+BASE_DIR = [p for p in BASE_DIR_OPT if p.exists()][0]
+print("BASE_DIR:", BASE_DIR)
+assert BASE_DIR.exists()
+
+DATA_DIR = BASE_DIR / "data"
+print("DATA_DIR:", DATA_DIR)
+assert DATA_DIR.exists()
+
+GITTABLES_DIR = DATA_DIR / "gittables"
+assert GITTABLES_DIR.exists()
+
+# %% 
+# mflow settings
+MLFLOW_TRACKING_URI = BASE_DIR / "outcomes" / "mlruns"
+MLFLOW_EXPERIMENT_NAME = "gittables"
+
+mlflow.set_tracking_uri(str(MLFLOW_TRACKING_URI))
+
+# %% 
 MODEL_ID = "gittables_full"
 LEAST_TARGET_COUNT = 100 # Should not have an effect on the results for full dataset
 BASE_FEATURES_FILE_NAME = "{model_id}_features{batch_id}.csv"
-
 # %% 
 def _get_data_and_targets(row):
     row = row[1]
@@ -180,20 +202,24 @@ def main():
 
 
     # %%
-    start = datetime.now()
-    print(f'Started Model Training at {start}')
+    with mlflow.start_run(
+        experiment_id = MLFLOW_EXPERIMENT_NAME,
+    ) as run:
+        start = datetime.now()
+        print(f'Started Model Training at {start}')
 
-    model = SherlockModel()
-    # Model will be stored with ID `model_id`
-    model.fit(X_train, y_train, X_validation, y_validation, model_id=MODEL_ID)
+        model = SherlockModel()
+        # Model will be stored with ID `model_id`
+        model.fit(X_train, y_train, X_validation, y_validation, model_id=MODEL_ID, active_run = run)
 
-    print('Trained and saved new model.')
-    print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
+        print('Trained and saved new model.')
+        print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
 
-    model.store_weights(model_id=MODEL_ID)
-    # %%
-    t = model.predict(X_test, model_id=MODEL_ID)
-    print("Test Acc.", sum(t == y_test) / len(y_test))
+        model.store_weights(model_id=MODEL_ID)
+        # %%
+        y_pred = model.predict(X_test, model_id=MODEL_ID)
+        print("Test Acc.", sum(y_pred == y_test) / len(y_test))
+        run.log_metric("Test Accuracy", accuracy_score(y_test, y_pred))
 
 # %%
 if __name__ == "__main__":
