@@ -41,9 +41,19 @@ assert DATA_DIR.exists()
 # %% 
 # mflow settings
 MLFLOW_TRACKING_URI = BASE_DIR / "outcomes" / "mlruns"
-MLFLOW_EXPERIMENT_NAME = "gittables"
-
 mlflow.set_tracking_uri(str(MLFLOW_TRACKING_URI))
+assert MLFLOW_TRACKING_URI.exists()
+
+MLFLOW_EXPERIMENT_NAME = "gittables"
+if mlflow.get_experiment_by_name(MLFLOW_EXPERIMENT_NAME) is None:
+    mlflow.create_experiment(MLFLOW_EXPERIMENT_NAME)
+    print("Created experiment:", MLFLOW_EXPERIMENT_NAME)
+mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
+
+MLFLOW_ARTIFACT_BASE_DIR = BASE_DIR / "outcomes" / "mlflow_artifacts"
+MLFLOW_ARTIFACT_DIR = MLFLOW_ARTIFACT_BASE_DIR / MLFLOW_EXPERIMENT_NAME / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+MLFLOW_ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
+print("MLFLOW_ARTIFACT_DIR:", MLFLOW_ARTIFACT_DIR)
 
 # %% 
 MODEL_ID = "gittables_full"
@@ -191,20 +201,27 @@ def main():
     # %% 
     # store data as .parquet files
     print("Storing data as parquet files...")
-    X_train.to_parquet(DATA_DIR / f'{MODEL_ID}_X_train.parquet', engine='pyarrow', compression='snappy')
-    pd.DataFrame(y_train, columns=["label"]).to_parquet(DATA_DIR / f'{MODEL_ID}_y_train.parquet', engine='pyarrow', compression='snappy')
+    x_train_fp = MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_X_train.parquet'
+    y_train_fp = MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_y_train.parquet'
+    x_validation_fp = MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_X_validation.parquet'
+    y_validation_fp = MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_y_validation.parquet'
+    x_test_fp = MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_X_test.parquet'
+    y_test_fp = MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_y_test.parquet'
 
-    X_validation.to_parquet(DATA_DIR / f'{MODEL_ID}_X_validation.parquet', engine='pyarrow', compression='snappy')
-    pd.DataFrame(y_validation, columns=["label"]).to_parquet(DATA_DIR / f'{MODEL_ID}_y_validation.parquet', engine='pyarrow', compression='snappy')
-
-    X_test.to_parquet(DATA_DIR / f'{MODEL_ID}_X_test.parquet', engine='pyarrow', compression='snappy')
-    pd.DataFrame(y_test, columns=["label"]).to_parquet(DATA_DIR / f'{MODEL_ID}_y_test.parquet', engine='pyarrow', compression='snappy')
-
+    for data, fp in zip(
+        [X_train, y_train, X_validation, y_validation, X_test, y_test]
+        [x_train_fp, y_train_fp, x_validation_fp, y_validation_fp, x_test_fp, y_test_fp], 
+    ):
+        if fp.exists():
+            print("Warning", fp, "already exists. Deleting...")
+            fp.unlink()
+        if isinstance(data, pd.DataFrame):
+            data.to_parquet(fp, engine='pyarrow', compression='snappy')
+        else:
+            pd.DataFrame(data, columns=["label"]).to_parquet(fp, engine='pyarrow', compression='snappy') 
 
     # %%
-    with mlflow.start_run(
-        experiment_id = MLFLOW_EXPERIMENT_NAME,
-    ) as run:
+    with mlflow.start_run() as run:
         start = datetime.now()
         print(f'Started Model Training at {start}')
 
@@ -218,11 +235,22 @@ def main():
         model.store_weights(model_id=MODEL_ID)
         # %%
         y_pred = model.predict(X_test, model_id=MODEL_ID)
-        print("Test Acc.", sum(y_pred == y_test) / len(y_test))
-        run.log_metric("Test Accuracy", accuracy_score(y_test, y_pred))
+        test_acc = accuracy_score(y_test, y_pred)
 
-        with open( DATA_DIR / f"{MODEL_ID}_model.json", "w") as f_model:
+        print("test_categorical_accuracy", test_acc) 
+        mlflow.log_metric("test_categorical_accuracy", test_acc)
+        mlflow.log_artifact(MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_X_test.parquet')
+        mlflow.log_artifact(MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_y_test.parquet')
+        
+        model_output_fp = MLFLOW_ARTIFACT_DIR / f"{MODEL_ID}_model.json"
+        with open(model_output_fp) as f_model:
             f_model.write(model.model.to_json())
+        
+        mlflow.log_artifact(model_output_fp)
+
+        # let's see if this works
+        mlflow.tensorflow.log_model(model.model, "sherlock-model")
+
 # %%
 if __name__ == "__main__":
     prepare_feature_extraction()
