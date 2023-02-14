@@ -248,8 +248,6 @@ def main():
         
         mlflow.log_artifact(model_output_fp)
 
-        # let's see if this works
-        mlflow.tensorflow.log_model(model.model, "sherlock-model")
 
 # %%
 if __name__ == "__main__":
