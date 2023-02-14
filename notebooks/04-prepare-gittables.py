@@ -243,7 +243,7 @@ def main():
         mlflow.log_artifact(MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_y_test.parquet')
         
         model_output_fp = MLFLOW_ARTIFACT_DIR / f"{MODEL_ID}_model.json"
-        with open(model_output_fp) as f_model:
+        with open(model_output_fp, "w") as f_model:
             f_model.write(model.model.to_json())
         
         mlflow.log_artifact(model_output_fp)
