@@ -51,7 +51,7 @@ if mlflow.get_experiment_by_name(MLFLOW_EXPERIMENT_NAME) is None:
 mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
 MLFLOW_ARTIFACT_BASE_DIR = BASE_DIR / "outcomes" / "mlflow_artifacts"
-MLFLOW_ARTIFACT_DIR = MLFLOW_ARTIFACT_BASE_DIR / MLFLOW_EXPERIMENT_NAME / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+MLFLOW_ARTIFACT_DIR = MLFLOW_ARTIFACT_BASE_DIR / MLFLOW_EXPERIMENT_NAME 
 MLFLOW_ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 print("MLFLOW_ARTIFACT_DIR:", MLFLOW_ARTIFACT_DIR)
 
@@ -209,8 +209,8 @@ def main():
     y_test_fp = MLFLOW_ARTIFACT_DIR / f'{MODEL_ID}_y_test.parquet'
 
     for data, fp in zip(
-        [X_train, y_train, X_validation, y_validation, X_test, y_test]
-        [x_train_fp, y_train_fp, x_validation_fp, y_validation_fp, x_test_fp, y_test_fp], 
+        [X_train, y_train, X_validation, y_validation, X_test, y_test], 
+        [x_train_fp, y_train_fp, x_validation_fp, y_validation_fp, x_test_fp, y_test_fp]
     ):
         if fp.exists():
             print("Warning", fp, "already exists. Deleting...")
