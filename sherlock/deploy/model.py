@@ -32,7 +32,7 @@ class SherlockModel:
     ):
         if active_run:
             mlflow.set_tag("model_id", model_id)
-            mlflow.keras.autolog()
+            mlflow.tensorflow.autolog()
             
         if model_id == "sherlock":
             raise ValueError(
