@@ -1,0 +1,13 @@
+
+
+# run sherlock on gittabes
+from prepare_gittables import main as prepare_gittables
+from train_sherlock import main as train_sherlock
+from analyze_gittables import run_analysis
+
+model_id = "sherlock-base"
+experiment_name = "sherlock-base"
+
+X_train, X_validation, y_train, y_validation, X_test, y_test =  prepare_gittables()
+model, X_test, y_test = train_sherlock(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test)
+run_analysis(model_id, experiment_name, model, X_test, y_test)
