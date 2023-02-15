@@ -11,7 +11,12 @@ import pathlib
 import numpy as np
 import pandas as pd
 import mlflow
-from mlflow.client import MlflowClient
+
+if mlflow.__version__ == '1.23.1':
+    print("mlflow.__version__ is 1.23.1.is used...")
+    from mlflow.tracking import MlflowClient
+else:
+    from mlflow.client import MlflowClient
 
 from sklearn.metrics import f1_score, classification_report, confusion_matrix, ConfusionMatrixDisplay, accuracy_score 
 
