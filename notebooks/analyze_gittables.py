@@ -28,7 +28,7 @@ except:
     print("matplotlib with AGG backend not available. Plotting disabled.")
     _plot_available = False
     
-from sherlock.helpers import get_processed_data_dir, setup_mlflow, get_mlflow_artifact_dir
+from sherlock.helpers import get_mlflow_artifact_dir
 
 
 # %%
