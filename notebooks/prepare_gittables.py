@@ -158,11 +158,10 @@ def main():
     targets_fp = processed_data_dir / f"targets.csv"
 
     BASE_FEATURES_FILE_NAME = "features{batch_id}.csv"
-    BASE_FEATURES_FILE_PATH = DATA_DIR / BASE_FEATURES_FILE_NAME.format(
+    BASE_FEATURES_FILE_PATH = processed_data_dir / BASE_FEATURES_FILE_NAME.format(
         batch_id="")
     batch_size = 10000
-    
-    # TODO: make sure to load targets as well
+
     if not BASE_FEATURES_FILE_PATH.exists():
         if data_fp.exists() and targets_fp.exists():
             print("Loading data and targets from parquet files...")
@@ -213,15 +212,13 @@ def main():
                 # remove batch file
                 _fp.unlink()
                         
-    
-    # %% 
     targets = pd.read_csv(targets_fp)["labels"].values
     feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32)
 
     print("Length of feature vectors:", len(feature_vectors))
     print("Length of targets:", len(targets))
 
-    X_train, X_validation, y_train, y_validation, X_test, y_test = split_data(feature_vectors, targets)
+    X_train, X_validation, y_train, y_validation, X_test, y_test = split_data(feature_vectors, targets, store_fp=processed_data_dir) 
     return X_train, X_validation, y_train, y_validation, X_test, y_test
 
 
