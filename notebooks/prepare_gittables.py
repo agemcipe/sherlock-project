@@ -26,10 +26,10 @@ PROCESSED_DATA_ID = "full"
 def get_processed_data_dir(base_path: pathlib.Path = DATA_DIR, processed_data_id: str = PROCESSED_DATA_ID):
     PROCESSED_DATA_DIR = base_path / "processed" / processed_data_id 
     if PROCESSED_DATA_DIR.exists():
-        print("Warning. PROCESSED_DATA_DIR already exists. Overwriting.")
+        print(f"Warning. {PROCESSED_DATA_DIR} already exists. Overwriting.")
     else:
         PROCESSED_DATA_DIR.mkdir(parents=True)
-
+    return PROCESSED_DATA_DIR
 
 # %% 
 LEAST_TARGET_COUNT = 100 # Should not have an effect on the results for full dataset
