@@ -3,6 +3,7 @@ import zipfile
 import pathlib
 import gdown
 import mlflow
+import pandas as pd
 
 
 BASE_DIR_OPT = [

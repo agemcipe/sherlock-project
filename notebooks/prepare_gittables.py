@@ -142,6 +142,27 @@ def main():
     ont_file = DATA_DIR / "dbpedia_semantic_types_filtered_1000.csv"
     index_file = DATA_DIR / "mapping_column_name_semantic_type.csv"
     processed_data_dir = get_processed_data_dir()
+    
+    resulting_files = [
+          processed_data_dir / f'X_train.parquet'
+        , processed_data_dir / f'y_train.parquet'
+        , processed_data_dir / f'X_validation.parquet'
+        , processed_data_dir / f'y_validation.parquet'
+        , processed_data_dir / f'X_test.parquet'
+        , processed_data_dir / f'y_test.parquet'
+    ]
+
+    if all([p.exists() for p in resulting_files]):
+        print("Data already processed. Skipping...")
+        return [
+            pd.read_parquet(resulting_files[0]),
+            pd.read_parquet(resulting_files[1])["label"].values,
+            pd.read_parquet(resulting_files[2]),
+            pd.read_parquet(resulting_files[3])["label"].values,
+            pd.read_parquet(resulting_files[4]),
+            pd.read_parquet(resulting_files[5])["label"].values,
+        ]
+
 
     ont_df = pd.read_csv(ont_file)
     index_df = pd.read_csv(index_file)
