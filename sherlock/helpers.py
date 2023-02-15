@@ -5,7 +5,6 @@ import gdown
 import mlflow
 
 
-
 BASE_DIR_OPT = [
     pathlib.Path("/home/agemcipe/code/hpi_coursework/master_thesis/"),
     pathlib.Path("/home/jonathan.haas/master_thesis/"),
@@ -13,7 +12,7 @@ BASE_DIR_OPT = [
 BASE_DIR = [p for p in BASE_DIR_OPT if p.exists()][0]
 BASE_DATA_DIR = BASE_DIR / "data" / "gittables"
 DATA_DIR = BASE_DATA_DIR / "gittables"
-MODEL_FILES_DIR = pathlib.Path(__file__).parents.parents / "model_files"
+MODEL_FILES_DIR = pathlib.Path(__file__).parent.parent / "model_files"
 
     
 def setup_mlflow(experiment_name):
