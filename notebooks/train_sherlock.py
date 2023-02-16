@@ -29,11 +29,11 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         val_idx = np.argwhere(y_validation != "http://dbpedia.org/ontology/age").flatten()
         test_idx = np.argwhere(y_test != "http://dbpedia.org/ontology/age").flatten()
 
-        X_train = X_train.loc[train_idx]
+        X_train = X_train[X_train.index.isin(train_idx)]
         y_train = y_train[train_idx]
-        X_validation = X_validation.loc[val_idx]
+        X_validation = X_validation[X_validation.index.isin(val_idx)]
         y_validation = y_validation[val_idx]
-        X_test = X_test.loc[test_idx]
+        X_test = X_test[X_test.index.isin(test_idx)]
         y_test = y_test[test_idx]
 
         # log parameters
