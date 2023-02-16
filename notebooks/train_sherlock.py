@@ -10,7 +10,7 @@ from sherlock.helpers import setup_mlflow, get_mlflow_artifact_dir
 
 from analyze_gittables import run_analysis
 EXPERIMENT_NAME = "sherlock-base"
-MODEL_ID = "sherlock-base" 
+MODEL_ID = "sherlock-no-age" 
 
 def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test):
     setup_mlflow(experiment_name=experiment_name)
@@ -24,6 +24,28 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
 
         model = SherlockModel()
         # Model will be stored with ID `model_id`
+        # let's filter for age type
+        train_idx = y_train[y_train == "http://dbpedia.org/ontology/Age"].index
+        val_idx = y_validation[y_validation == "http://dbpedia.org/ontology/Age"].index
+        test_idx = y_test[y_test == "http://dbpedia.org/ontology/Age"].index
+
+        X_train = X_train.loc[train_idx]
+        y_train = y_train.loc[train_idx]
+        X_validation = X_validation.loc[val_idx]
+        y_validation = y_validation.loc[val_idx]
+        X_test = X_test.loc[test_idx]
+        y_test = y_test.loc[test_idx]
+
+        mlflow.log_param("train_rows", X_train.shape[0])
+        mlflow.log_param("train_cols", X_train.shape[1])
+        mlflow.log_param("train_classes", len(np.unique(y_train)))
+        mlflow.log_param("validation_rows", X_validation.shape[0])
+        mlflow.log_param("validation_cols", X_validation.shape[1])
+        mlflow.log_param("validation_classes", len(np.unique(y_validation)))
+        mlflow.log_param("test_rows", X_test.shape[0])
+        mlflow.log_param("test_cols", X_test.shape[1])
+        mlflow.log_param("test_classes", len(np.unique(y_test)))
+
         model.fit(X_train, y_train, X_validation, y_validation, model_id=model_id, active_run = run)
 
         print('Trained and saved new model.')

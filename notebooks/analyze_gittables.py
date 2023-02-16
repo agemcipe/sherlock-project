@@ -108,4 +108,6 @@ def run_analysis(model_id, experiment_name, mlflow_client: MlflowClient = None, 
         
         if _mlflow_active:
             mlflow.log_figure(fig, f"confusion_matrix.png")
+    
+    print("Finished Run: ", mlflow.active_run().info.run_id)
         
