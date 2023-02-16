@@ -11,7 +11,7 @@ BASE_DIR_OPT = [
     pathlib.Path("/home/jonathan.haas/master_thesis/"),
 ]
 BASE_DIR = [p for p in BASE_DIR_OPT if p.exists()][0]
-BASE_DATA_DIR = BASE_DIR / "data" / "gittables"
+BASE_DATA_DIR = BASE_DIR / "data" 
 DATA_DIR = BASE_DATA_DIR / "gittables"
 MODEL_FILES_DIR = pathlib.Path(__file__).parent.parent / "model_files"
 
