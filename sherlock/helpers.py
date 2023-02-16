@@ -18,7 +18,7 @@ MODEL_FILES_DIR = pathlib.Path(__file__).parent.parent / "model_files"
     
 def setup_mlflow(experiment_name):
     
-    mlflow.set_tracking_uri(BASE_DIR / "outcomes" / "mlruns")
+    mlflow.set_tracking_uri(str(BASE_DIR / "outcomes" / "mlruns"))
 
     if mlflow.get_experiment_by_name(experiment_name) is None:
         mlflow.create_experiment(experiment_name)
@@ -30,8 +30,8 @@ def get_mlflow_artifact_dir(experiment_name, run_id=None):
     MLFLOW_ARTIFACT_DIR = MLFLOW_ARTIFACT_BASE_DIR / experiment_name 
     if run_id is not None:
         MLFLOW_ARTIFACT_DIR = MLFLOW_ARTIFACT_DIR / run_id
-
     MLFLOW_ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
+
     return MLFLOW_ARTIFACT_DIR
 
 def download_data():
