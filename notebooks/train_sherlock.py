@@ -25,9 +25,9 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         model = SherlockModel()
         # Model will be stored with ID `model_id`
         # let's filter for age type
-        train_idx = y_train[y_train == "http://dbpedia.org/ontology/Age"].index
-        val_idx = y_validation[y_validation == "http://dbpedia.org/ontology/Age"].index
-        test_idx = y_test[y_test == "http://dbpedia.org/ontology/Age"].index
+        train_idx =np.argwhere(y_train == "http://dbpedia.org/ontology/age").flatten()
+        val_idx = np.argwhere(y_validation == "http://dbpedia.org/ontology/age").flatten()
+        test_idx = np.argwhere(y_test == "http://dbpedia.org/ontology/age").flatten()
 
         X_train = X_train.loc[train_idx]
         y_train = y_train.loc[train_idx]
