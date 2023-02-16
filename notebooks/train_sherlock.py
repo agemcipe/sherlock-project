@@ -36,9 +36,9 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
             else:
                 raise ValueError(f"Unknown model_id {model_id}")
             
-            train_idx = pd.Series(y_train).isin(allowed_classes)
-            val_idx = pd.Series(y_validation).isin(allowed_classes)
-            test_idx = pd.Series(y_test).isin(allowed_classes)
+            train_idx = pd.Series(y_train).isin(allowed_classes).values
+            val_idx = pd.Series(y_validation).isin(allowed_classes).values
+            test_idx = pd.Series(y_test).isin(allowed_classes).values
 
             print(len(train_idx), len(val_idx), len(test_idx))
             print(len(X_train))
