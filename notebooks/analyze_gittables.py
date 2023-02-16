@@ -34,7 +34,7 @@ from sherlock.helpers import get_mlflow_artifact_dir
 # %%
 def run_analysis(model_id, experiment_name, mlflow_client: MlflowClient = None, model=None, X_test=None, y_test=None):
 
-    mlflow_artifact_dir = get_mlflow_artifact_dir(experiment_name, mlflow.active_run())
+    mlflow_artifact_dir = get_mlflow_artifact_dir(experiment_name, mlflow.active_run().info.run_id)
 
     if mlflow_client is None:
         mlflow_client = MlflowClient()
