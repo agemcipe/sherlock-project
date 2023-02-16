@@ -130,7 +130,7 @@ def split_data(data, targets, test_size=0.2, random_state=42, store_fp = None):
             else:
                 pd.DataFrame(data, columns=["label"]).to_parquet(fp, engine='pyarrow', compression='snappy') 
     
-    return X_train, X_validation, y_train, y_validation, X_test, y_test
+    return X_train, y_train, X_validation, y_validation, X_test, y_test
 
 def main():
 
@@ -239,8 +239,8 @@ def main():
     print("Length of feature vectors:", len(feature_vectors))
     print("Length of targets:", len(targets))
 
-    X_train, X_validation, y_train, y_validation, X_test, y_test = split_data(feature_vectors, targets, store_fp=processed_data_dir) 
-    return X_train, X_validation, y_train, y_validation, X_test, y_test
+    X_train, y_train, X_validation, y_validation, X_test, y_test = split_data(feature_vectors, targets, store_fp=processed_data_dir) 
+    return X_train, y_train, X_validation, y_validation, X_test, y_test
 
 
 

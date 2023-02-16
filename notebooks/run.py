@@ -8,6 +8,6 @@ from analyze_gittables import run_analysis
 model_id = "sherlock-base"
 experiment_name = "sherlock-base"
 
-X_train, X_validation, y_train, y_validation, X_test, y_test =  prepare_gittables()
+X_train, y_train, X_validation, y_validation, X_test, y_test =  prepare_gittables()
 model, X_test, y_test = train_sherlock(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test)
 run_analysis(model_id, experiment_name, model, X_test, y_test)
