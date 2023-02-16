@@ -28,7 +28,8 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         if model_id in ["sherlock-no-age", "sherlock-small"]:
             if model_id == "sherlock-no-age":
                 print("Removing age type...")
-                allowed_classes = (pd.Series(y_train) != "http://dbpedia.org/ontology/age").unique()
+                _y_train = pd.Series(y_train)
+                allowed_classes = _y_train[_y_train != "http://dbpedia.org/ontology/age"].unique()
             elif model_id == "sherlock-small":
                 print("Using small dataset...")
                 allowed_classes = pd.Series(y_train).value_counts().index[:10]
