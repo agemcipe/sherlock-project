@@ -25,17 +25,25 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         model = SherlockModel()
         # Model will be stored with ID `model_id`
         # let's filter for age type
-        train_idx =np.argwhere(y_train != "http://dbpedia.org/ontology/age").flatten()
-        val_idx = np.argwhere(y_validation != "http://dbpedia.org/ontology/age").flatten()
-        test_idx = np.argwhere(y_test != "http://dbpedia.org/ontology/age").flatten()
+        if model_id in ["sherlock-no-age", "sherlock-small"]:
+            if model_id == "sherlock-no-age":
+                print("Removing age type...")
+                allowed_classes = (pd.Series(y_train) != "http://dbpedia.org/ontology/age").unique()
+            elif model_id == "sherlock-small":
+                print("Using small dataset...")
+                allowed_classes = pd.Series(y_train).value_counts().index[:10]
 
-        X_train = X_train.loc[train_idx,:]
-        y_train = y_train[train_idx]
-        X_validation = X_validation.loc[val_idx,:]
-        y_validation = y_validation[val_idx]
-        X_test = X_test.loc[test_idx,:]
-        y_test = y_test[test_idx]
+            train_idx =pd.Series(y_train).isin(allowed_classes)
+            val_idx =  pd.Series(y_validation).isin(allowed_classes)
+            test_idx = pd.Series(y_test).isin(allowed_classes)
 
+            X_train = X_train.loc[train_idx,:]
+            y_train = y_train[train_idx]
+            X_validation = X_validation.loc[val_idx,:]
+            y_validation = y_validation[val_idx]
+            X_test = X_test.loc[test_idx,:]
+            y_test = y_test[test_idx]
+            
         print("train_rows", X_train.shape[0])
         print("train_cols", X_train.shape[1])
         print("train_classes", len(np.unique(y_train)))
@@ -45,7 +53,7 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         print("test_rows", X_test.shape[0])
         print("test_cols", X_test.shape[1])
         print("test_classes", len(np.unique(y_test)))
-        # log parameters
+            # log parameters
 
         mlflow.log_param("train_rows", X_train.shape[0])
         mlflow.log_param("train_cols", X_train.shape[1])
