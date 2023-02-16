@@ -25,16 +25,18 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         model = SherlockModel()
         # Model will be stored with ID `model_id`
         # let's filter for age type
-        train_idx =np.argwhere(y_train == "http://dbpedia.org/ontology/age").flatten()
-        val_idx = np.argwhere(y_validation == "http://dbpedia.org/ontology/age").flatten()
-        test_idx = np.argwhere(y_test == "http://dbpedia.org/ontology/age").flatten()
+        train_idx =np.argwhere(y_train != "http://dbpedia.org/ontology/age").flatten()
+        val_idx = np.argwhere(y_validation != "http://dbpedia.org/ontology/age").flatten()
+        test_idx = np.argwhere(y_test != "http://dbpedia.org/ontology/age").flatten()
 
         X_train = X_train.loc[train_idx]
-        y_train = y_train.loc[train_idx]
+        y_train = y_train[train_idx]
         X_validation = X_validation.loc[val_idx]
-        y_validation = y_validation.loc[val_idx]
+        y_validation = y_validation[val_idx]
         X_test = X_test.loc[test_idx]
-        y_test = y_test.loc[test_idx]
+        y_test = y_test[test_idx]
+
+        # log parameters
 
         mlflow.log_param("train_rows", X_train.shape[0])
         mlflow.log_param("train_cols", X_train.shape[1])
