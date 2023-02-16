@@ -8,6 +8,7 @@ from sherlock.deploy.model import SherlockModel
 
 from sherlock.helpers import setup_mlflow, get_mlflow_artifact_dir
 
+from analyze_gittables import run_analysis
 EXPERIMENT_NAME = "sherlock-base"
 MODEL_ID = "sherlock-base" 
 
@@ -40,6 +41,7 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         with open(model_output_fp, "w") as f_model:
             f_model.write(model.model.to_json())
         mlflow.log_artifact(model_output_fp) 
+        run_analysis(model_id, experiment_name, model = model, X_test = X_test, y_test = y_test) 
         return model, X_test, y_test
 
 if __name__ == "__main__":
