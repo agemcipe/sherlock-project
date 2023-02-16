@@ -95,7 +95,7 @@ def run_analysis(model_id, experiment_name, mlflow_client: MlflowClient = None, 
         cfm_fp = f"../outcomes/confusion_matrix_{model_id}.csv"
         cfm_df.to_csv(cfm_fp, index=True, header=True)
         
-        mlflow.log_artifact(f"../outcomes/confusion_matrix_{model_id}.png", "confusion_matrix.png")
+        mlflow.log_artifact(f"../outcomes/confusion_matrix_{model_id}.csv", "confusion_matrix.png")
 
     # plotting confusion matrix
     if _plot_available:
