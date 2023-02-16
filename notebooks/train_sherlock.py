@@ -32,7 +32,8 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
             elif model_id == "sherlock-small":
                 print("Using small dataset...")
                 allowed_classes = pd.Series(y_train).value_counts().index[:10]
-
+            else:
+                raise ValueError(f"Unknown model_id {model_id}")
             train_idx =pd.Series(y_train).isin(allowed_classes)
             val_idx =  pd.Series(y_validation).isin(allowed_classes)
             test_idx = pd.Series(y_test).isin(allowed_classes)
@@ -43,6 +44,7 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
             y_validation = y_validation[val_idx]
             X_test = X_test.loc[test_idx,:]
             y_test = y_test[test_idx]
+        
             
         print("train_rows", X_train.shape[0])
         print("train_cols", X_train.shape[1])

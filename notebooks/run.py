@@ -4,7 +4,7 @@
 from prepare_gittables import main as prepare_gittables
 from train_sherlock import main as train_sherlock
 
-model_id = "sherlock-base"
+model_id = "sherlock-no-age"
 experiment_name = "sherlock-base"
 
 X_train, y_train, X_validation, y_validation, X_test, y_test =  prepare_gittables()
