@@ -39,13 +39,15 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
             train_idx = pd.Series(y_train).isin(allowed_classes)
             val_idx = pd.Series(y_validation).isin(allowed_classes)
             test_idx = pd.Series(y_test).isin(allowed_classes)
+
             print(len(train_idx), len(val_idx), len(test_idx))
             print(len(X_train))
-            X_train = X_train.loc[train_idx]
+
             y_train = y_train[train_idx]
-            X_validation = X_validation.loc[val_idx]
+            X_train = X_train[train_idx]
+            X_validation = X_validation[val_idx]
             y_validation = y_validation[val_idx]
-            X_test = X_test.loc[test_idx]
+            X_test = X_test[test_idx]
             y_test = y_test[test_idx]
         
             
