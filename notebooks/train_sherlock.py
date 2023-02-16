@@ -35,8 +35,9 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
                 allowed_classes = pd.Series(y_train).value_counts().index[:10]
             else:
                 raise ValueError(f"Unknown model_id {model_id}")
-            train_idx =pd.Series(y_train).isin(allowed_classes)
-            val_idx =  pd.Series(y_validation).isin(allowed_classes)
+            
+            train_idx = pd.Series(y_train).isin(allowed_classes)
+            val_idx = pd.Series(y_validation).isin(allowed_classes)
             test_idx = pd.Series(y_test).isin(allowed_classes)
 
             X_train = X_train.loc[train_idx]
