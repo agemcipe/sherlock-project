@@ -100,7 +100,7 @@ class SherlockModel:
                 y_val_cat,
             ),
             callbacks=callbacks,
-            epochs=100,
+            epochs=1,
             batch_size=256,
         )
 
@@ -216,6 +216,7 @@ class SherlockModel:
         )
 
         self.model.save_weights(weights_filename)
+        return weights_filename
 
     def _build_char_submodel(self, char_shape):
         n_weights = 300
