@@ -8,7 +8,6 @@ import tqdm
 import mlflow
 
 # %% 
-from sherlock.deploy.model import SherlockModel
 from sherlock.functional import extract_features_to_csv
 from sherlock.features.paragraph_vectors import initialise_pretrained_model, initialise_nltk
 from sherlock.features.preprocessing import (
