@@ -100,7 +100,7 @@ class SherlockModel:
                 y_val_cat,
             ),
             callbacks=callbacks,
-            epochs=1,
+            epochs=100,
             batch_size=256,
         )
 
