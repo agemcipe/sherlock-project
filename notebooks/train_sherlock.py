@@ -28,15 +28,18 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         print('Trained and saved new model.')
         print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
 
-        model.store_weights(model_id=model_id)
+        fp = model.store_weights(model_id=model_id)
+
         shutil.copyfile(
-            model.model_path, mlflow_artifact_dir / f"weights.h5"
+            fp, mlflow_artifact_dir / f"weights.h5"
             )
+        mlflow.log_artifact(mlflow_artifact_dir / f"weights.h5")
 
         model_output_fp = mlflow_artifact_dir / f"model.json"
+        # TODO: log this to mlflow
         with open(model_output_fp, "w") as f_model:
             f_model.write(model.model.to_json())
-        
+        mlflow.log_artifact(model_output_fp) 
         return model, X_test, y_test
 
 if __name__ == "__main__":
