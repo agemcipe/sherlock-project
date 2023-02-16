@@ -12,12 +12,11 @@ EXPERIMENT_NAME = "sherlock-base"
 MODEL_ID = "sherlock-base" 
 
 def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test):
-    # %%
     setup_mlflow(experiment_name=experiment_name)
     with mlflow.start_run() as run:
         start = datetime.now()
 
-        mlflow_artifact_dir = get_mlflow_artifact_dir(experiment_name, run)
+        mlflow_artifact_dir = get_mlflow_artifact_dir(experiment_name, run.info.run_id)
         print(f'Artifacts will be stored at {mlflow_artifact_dir}')
 
         print(f'Started Model Training at {start}')
