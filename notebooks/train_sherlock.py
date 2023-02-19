@@ -61,17 +61,15 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         print("test_cols", X_test.shape[1])
         print("test_classes", len(np.unique(y_test)))
             # log parameters
-
+        mlflow.log_param("feature_set", feature_sets)
         mlflow.log_param("train_rows", X_train.shape[0])
-        mlflow.log_param("train_cols", X_train.shape[1])
         mlflow.log_param("train_classes", len(np.unique(y_train)))
         mlflow.log_param("validation_rows", X_validation.shape[0])
-        mlflow.log_param("validation_cols", X_validation.shape[1])
         mlflow.log_param("validation_classes", len(np.unique(y_validation)))
         mlflow.log_param("test_rows", X_test.shape[0])
-        mlflow.log_param("test_cols", X_test.shape[1])
         mlflow.log_param("test_classes", len(np.unique(y_test)))
 
+        mlflow.log_param("test_cols", X_test.shape[1])
         model.fit(X_train, y_train, X_validation, y_validation, model_id=model_id, active_run = run, feature_sets = feature_sets, epochs = epochs)
 
         print('Trained and saved new model.')

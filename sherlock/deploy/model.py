@@ -98,6 +98,10 @@ class SherlockModel:
             metrics=["categorical_accuracy"],
         )
 
+        if active_run:
+            mlflow.log_param("train_cols", sum(len(X_train[feature_cols[feature]].columns) for feature in feature_sets))
+            mlflow.log_param("val_cols", sum(len(X_val[feature_cols[feature]].columns) for feature in feature_sets))
+            
         model.fit(
             [features["train"][feature].values for feature in feature_sets],
             y_train_cat,
