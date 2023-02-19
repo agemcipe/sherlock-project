@@ -14,7 +14,7 @@ MODEL_ID = "sherlock-no-age"
 
 def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test, feature_sets, epochs):
     setup_mlflow(experiment_name=experiment_name)
-    with mlflow.start_run() as run:
+    with mlflow.start_run(run_name=model_id) as run:
         start = datetime.now()
 
         mlflow_artifact_dir = get_mlflow_artifact_dir(experiment_name, run.info.run_id)
