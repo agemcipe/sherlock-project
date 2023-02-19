@@ -81,12 +81,12 @@ class SherlockModel:
 
         # merged_model1 = concatenate([char_model, word_model, par_model, rest_model])
         
-        merged_model1 = concatenate([_models[feature_set][1] for feature_set in feature_sets])
+        merged_model1 = concatenate([_models[feature][1] for feature in feature_sets])
 
         merged_model_output = self._add_main_layers(merged_model1, num_classes)
 
         model = Model(
-            [_models[feature_set][0] for feature_set in feature_sets],
+            [_models[feature][0] for feature in feature_sets],
             merged_model_output,
         )
 
@@ -97,10 +97,10 @@ class SherlockModel:
         )
 
         model.fit(
-            [features[feature_set]["train"].values for feature_set in feature_sets],
+            [features["train"][feature].values for feature in feature_sets],
             y_train_cat,
             validation_data=(
-            [features[feature_set]["val"].values for feature_set in feature_sets],
+            [features["val"][feature].values for feature in feature_sets],
                 y_val_cat,
             ),
             callbacks=callbacks,
