@@ -17,4 +17,4 @@ X_train, y_train, X_validation, y_validation, X_test, y_test =  prepare_gittable
 for feature in feature_sets:
     print(f"Running sherlock with {feature} features")
     model_id = MODEL_ID + "__" + feature
-    model, X_test, y_test = train_sherlock(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test, feature_sets, epochs)
+    model, X_test, y_test = train_sherlock(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test, [feature], epochs)
