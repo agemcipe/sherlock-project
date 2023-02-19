@@ -112,7 +112,7 @@ class SherlockModel:
 
         _ = helpers._get_categorical_label_encodings(y_train, y_val, model_id)
 
-    def predict(self, X: pd.DataFrame, model_id: str = "sherlock") -> np.array:
+    def predict(self, X: pd.DataFrame, model_id: str = "sherlock", feature_sets = helpers.IMPLEMENTED_FEATURE_SETS) -> np.array:
         """Use sherlock model to generate predictions for X.
 
         Parameters
@@ -126,7 +126,7 @@ class SherlockModel:
         -------
         Array with predictions for X.
         """
-        y_pred = self.predict_proba(X, model_id)
+        y_pred = self.predict_proba(X, model_id, feature_sets=feature_sets)
         y_pred_classes = helpers._proba_to_classes(y_pred, model_id)
 
         return y_pred_classes
