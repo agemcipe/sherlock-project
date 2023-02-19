@@ -32,7 +32,7 @@ from sherlock.helpers import get_mlflow_artifact_dir
 
 
 # %%
-def run_analysis(model_id, experiment_name, mlflow_client: MlflowClient = None, model=None, X_test=None, y_test=None):
+def run_analysis(model_id, experiment_name, mlflow_client: MlflowClient = None, model=None, X_test=None, y_test=None, feature_sets=None):
 
     mlflow_artifact_dir = get_mlflow_artifact_dir(experiment_name, mlflow.active_run().info.run_id)
 
@@ -64,7 +64,7 @@ def run_analysis(model_id, experiment_name, mlflow_client: MlflowClient = None, 
         print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
 
     print("Predicting on test set...")
-    y_pred = model.predict(X_test, model_id=model_id)
+    y_pred = model.predict(X_test, model_id=model_id, feature_sets=feature_sets)
     test_acc = accuracy_score(y_test, y_pred)
     test_f1 = f1_score(y_test, y_pred, average="weighted")
 

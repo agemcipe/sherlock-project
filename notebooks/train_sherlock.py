@@ -12,7 +12,7 @@ from analyze_gittables import run_analysis
 EXPERIMENT_NAME = "sherlock-base"
 MODEL_ID = "sherlock-no-age" 
 
-def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test):
+def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test, feature_sets, epochs):
     setup_mlflow(experiment_name=experiment_name)
     with mlflow.start_run() as run:
         start = datetime.now()
@@ -72,7 +72,7 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         mlflow.log_param("test_cols", X_test.shape[1])
         mlflow.log_param("test_classes", len(np.unique(y_test)))
 
-        model.fit(X_train, y_train, X_validation, y_validation, model_id=model_id, active_run = run)
+        model.fit(X_train, y_train, X_validation, y_validation, model_id=model_id, active_run = run, feature_sets = feature_sets, epochs = epochs)
 
         print('Trained and saved new model.')
         print(f'Finished at {datetime.now()}, took {datetime.now() - start} seconds')
@@ -89,7 +89,7 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         with open(model_output_fp, "w") as f_model:
             f_model.write(model.model.to_json())
         mlflow.log_artifact(model_output_fp) 
-        run_analysis(model_id, experiment_name, model = model, X_test = X_test, y_test = y_test) 
+        run_analysis(model_id, experiment_name, model = model, X_test = X_test, y_test = y_test, feature_sets = feature_sets) 
         return model, X_test, y_test
 
 if __name__ == "__main__":
