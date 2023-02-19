@@ -15,10 +15,13 @@ BASE_DATA_DIR = BASE_DIR / "data"
 DATA_DIR = BASE_DATA_DIR / "gittables"
 MODEL_FILES_DIR = pathlib.Path(__file__).parent.parent / "model_files"
 
+MLFLOW_TRACKING_URI = "http://mlflow.hdfcbdexgmemcsht.westeurope.azurecontainer.io:80"
+
     
 def setup_mlflow(experiment_name):
-    
-    mlflow.set_tracking_uri(str(BASE_DIR / "outcomes" / "mlruns"))
+
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    # mlflow.set_tracking_uri(str(BASE_DIR / "outcomes" / "mlruns"))
 
     if mlflow.get_experiment_by_name(experiment_name) is None:
         mlflow.create_experiment(experiment_name)
