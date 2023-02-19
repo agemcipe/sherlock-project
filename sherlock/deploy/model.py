@@ -80,8 +80,10 @@ class SherlockModel:
         # Merge submodels and build main network
 
         # merged_model1 = concatenate([char_model, word_model, par_model, rest_model])
-        
-        merged_model1 = concatenate([_models[feature][1] for feature in feature_sets])
+        if len(feature_sets) == 1:
+            merged_model1 = _models[feature_sets[0]][1]
+        else:
+            merged_model1 = concatenate([_models[feature][1] for feature in feature_sets])
 
         merged_model_output = self._add_main_layers(merged_model1, num_classes)
 
