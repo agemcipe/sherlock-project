@@ -14,6 +14,7 @@ MODEL_ID = "sherlock-no-age"
 
 def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test, feature_sets, epochs):
     setup_mlflow(experiment_name=experiment_name)
+
     with mlflow.start_run(run_name=model_id) as run:
         start = datetime.now()
 
@@ -25,8 +26,8 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         model = SherlockModel()
         # Model will be stored with ID `model_id`
         # let's filter for age type
-        if model_id in ["sherlock-no-age", "sherlock-small"]:
-            if model_id == "sherlock-no-age":
+        if model_id in ["sherlock-no-age__all", "sherlock-small"]:
+            if model_id == "sherlock-no-age__all":
                 print("Removing age type...")
                 _y_train = pd.Series(y_train)
                 allowed_classes = _y_train[_y_train != "http://dbpedia.org/ontology/age"].unique()

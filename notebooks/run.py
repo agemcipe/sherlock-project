@@ -10,11 +10,14 @@ experiment_name = [
     "test"
 ][0]
 feature_sets = ["char", "word", "par", "rest"]
-epochs = 1
+epochs = 100
 
 X_train, y_train, X_validation, y_validation, X_test, y_test =  prepare_gittables()
 
-for feature in feature_sets:
-    print(f"Running sherlock with {feature} features")
-    model_id = MODEL_ID + "__" + feature
-    model, X_test, y_test = train_sherlock(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test, [feature], epochs)
+for model_id in MODEL_ID[:2]:
+    model_id = MODEL_ID + "__" + "all"
+    model, X_test, y_test = train_sherlock(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test, feature_sets, epochs)
+# for feature in feature_sets:
+#     print(f"Running sherlock with {feature} features")
+#     model_id = MODEL_ID + "__" + feature
+#     model, X_test, y_test = train_sherlock(model_id, experiment_name, X_train, y_train, X_validation, y_validation, X_test, y_test, [feature], epochs)
