@@ -71,6 +71,9 @@ def main(model_id, experiment_name, X_train, y_train, X_validation, y_validation
         mlflow.log_param("test_classes", len(np.unique(y_test)))
 
         mlflow.log_param("test_cols", X_test.shape[1])
+
+
+        
         model.fit(X_train, y_train, X_validation, y_validation, model_id=model_id, active_run = run, feature_sets = feature_sets, epochs = epochs)
 
         print('Trained and saved new model.')
