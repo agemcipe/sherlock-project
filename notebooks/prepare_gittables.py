@@ -20,7 +20,7 @@ from sherlock.helpers import DATA_DIR
 
 
 # %%
-PROCESSED_DATA_ID = "full"
+PROCESSED_DATA_ID = "full_numeric_features"
 
 def get_processed_data_dir(base_path: pathlib.Path = DATA_DIR, processed_data_id: str = PROCESSED_DATA_ID):
     PROCESSED_DATA_DIR = base_path / "processed" / processed_data_id 
@@ -70,7 +70,7 @@ def get_data_and_targets(index_df: pd.DataFrame, n: int = 1000):
     return list(data), list(targets)
 
 
-def split_data(data, targets, test_size=0.2, random_state=42, store_fp = None):
+def split_data(data, targets, test_size=0.1, random_state=41, store_fp = None):
     """Split data and targets into train and test sets.
 
     Parameters
