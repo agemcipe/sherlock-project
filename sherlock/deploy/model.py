@@ -55,7 +55,11 @@ class SherlockModel:
         if "par" in feature_sets:
             features["train"]["par"] = X_train[feature_cols["par"]]
             features["val"]["par"] = X_val[feature_cols["par"]]
+        
         if "rest" in feature_sets:
+            print(feature_cols["rest"])
+            print("------")
+            print(X_train.columns)
             features["train"]["rest"] = X_train[feature_cols["rest"]]
             features["val"]["rest"] = X_val[feature_cols["rest"]]
 
