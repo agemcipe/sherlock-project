@@ -226,6 +226,7 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
             _len_data = len(data)
             del data
 
+            print("Reading new features")
             new_feature_vectors = pd.read_csv(str(_fp), dtype=np.float32)
             feature_vectors = pd.read_csv(
                 str(BASE_FEATURES_FILE_PATH), dtype=np.float32
@@ -244,6 +245,8 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
             feature_vectors = pd.concat(
                 [feature_vectors, new_feature_vectors[_new_cols]], axis=1
             )
+
+            print("Writing new features to", BASE_FEATURES_FILE_PATH)
             feature_vectors.to_csv(
                 str(BASE_FEATURES_FILE_PATH), index=False, dtype=np.float32
             )
