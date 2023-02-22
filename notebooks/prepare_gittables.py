@@ -213,16 +213,19 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
             print("Recalculating features", recalculate_feature_set)
             data = pd.read_csv(data_fp)["values"].astype(str)
 
-            _name = "_".join(feature_set)
+            _name = "_".join(recalculate_feature_set)
             _fp = processed_data_dir / BASE_FEATURES_FILE_NAME.format(
                 batch_id=f"_{_name}"
             )
 
-            extract_features_to_csv(
-                output_path=str(_fp),
-                parquet_values=data,
-                feature_set=recalculate_feature_set,
-            )
+            if not _fp.exists():
+                print("Warning", _fp, "already exists. Deleting...")
+
+                extract_features_to_csv(
+                    output_path=str(_fp),
+                    parquet_values=data,
+                    feature_set=recalculate_feature_set,
+                )
             _len_data = len(data)
             del data
 
@@ -248,7 +251,8 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
 
             print("Writing new features to", BASE_FEATURES_FILE_PATH)
             feature_vectors.to_csv(
-                str(BASE_FEATURES_FILE_PATH), index=False, dtype=np.float32
+                str(BASE_FEATURES_FILE_PATH),
+                index=False,
             )
 
     if not BASE_FEATURES_FILE_PATH.exists():
