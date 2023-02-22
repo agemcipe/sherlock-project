@@ -25,11 +25,3 @@
 2	none-agg-percent
 2	none-agg-num
 2	none-agg-all
-2	avg_numeric_values
-2	std_numeric_values
-2	min_numeric_values
-3	max_numeric_values
-3	median_numeric_values
-3	sum_numeric_values
-3	var_numeric_values
-3	iqr_numeric_values

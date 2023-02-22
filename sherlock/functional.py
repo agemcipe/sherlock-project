@@ -14,9 +14,11 @@ from sherlock.features.bag_of_characters import extract_bag_of_characters_featur
 from sherlock.features.bag_of_words import extract_bag_of_words_features
 from sherlock.features.word_embeddings import extract_word_embeddings_features
 from sherlock.features.paragraph_vectors import infer_paragraph_embeddings_features
+from sherlock.features.numeric import extract_numeric_features
 from sherlock.features.helpers import literal_eval_as_str, keys_to_csv
 from sherlock.global_state import is_first, set_first, reset_first
 
+IMPLEMENTED_FEATURES = ["char", "word", "rest", "parvec"]
 
 def as_py_str(x):
     return x.as_py() if isinstance(x, pyarrow.lib.StringScalar) else x
@@ -46,13 +48,19 @@ def normalise_string_whitespace(col_values: list):
     return list(map(normalise_whitespace, col_values))
 
 
-def extract_features(col_values: list):
+def extract_features(col_values: list, feature_set = IMPLEMENTED_FEATURES):
     features = OrderedDict()
 
-    extract_bag_of_characters_features(col_values, features)
-    extract_word_embeddings_features(col_values, features)
-    extract_bag_of_words_features(col_values, features, len(col_values))
-    infer_paragraph_embeddings_features(col_values, features, dim=400, reuse_model=True)
+    if "char" in feature_set:
+        extract_bag_of_characters_features(col_values, features)
+    if "word" in feature_set:
+        extract_word_embeddings_features(col_values, features)
+    if "rest" in feature_set:
+        extract_bag_of_words_features(col_values, features, len(col_values))
+    if "par" in feature_set:
+        infer_paragraph_embeddings_features(col_values, features, dim=400, reuse_model=True)
+    if "numeric" in feature_set:
+        extract_numeric_features(col_values, features)
 
     return features
 
@@ -100,7 +108,7 @@ def ensure_path_exists(output_path):
         os.makedirs(path)
 
 
-def extract_features_to_csv(output_path, parquet_values):
+def extract_features_to_csv(output_path, parquet_values, feature_set = IMPLEMENTED_FEATURES):
     verify_keys = False
     first_keys = None
     i = 0
@@ -130,7 +138,7 @@ def extract_features_to_csv(output_path, parquet_values):
             .map(to_string_list)
             .map(random_sample)
             .map(normalise_string_whitespace)
-            .map(extract_features)
+            .map(extract_features, feature_set = feature_set)
             .map(numeric_values_to_str)
             .map(drop_keys)
         ):

@@ -19,6 +19,7 @@ from sherlock.global_state import set_first, reset_first
 from sherlock.features.helpers import literal_eval_as_str, keys_to_csv
 
 
+
 def prepare_feature_extraction():
     """Download embedding files from Google Drive if they do not exist yet."""
     word_embedding_file = "../sherlock/features/glove.6B.50d.txt"

@@ -55,13 +55,13 @@ class SherlockModel:
         if "par" in feature_sets:
             features["train"]["par"] = X_train[feature_cols["par"]]
             features["val"]["par"] = X_val[feature_cols["par"]]
-        
         if "rest" in feature_sets:
             print(feature_cols["rest"])
-            print("------")
-            print(X_train.columns)
             features["train"]["rest"] = X_train[feature_cols["rest"]]
             features["val"]["rest"] = X_val[feature_cols["rest"]]
+        if "numeric" in feature_sets:
+            features["train"]["numeric"] = X_train[feature_cols["numeric"]]
+            features["val"]["numeric"] = X_val[feature_cols["numeric"]]
 
         y_train_int = encoder.transform(y_train)
         y_val_int = encoder.transform(y_val)
@@ -80,6 +80,8 @@ class SherlockModel:
             _models["par"] = self._build_par_submodel(features["train"]["par"].shape[1])
         if "rest" in feature_sets:
             _models["rest"] = self._build_rest_submodel(features["train"]["rest"].shape[1])
+        if "numeric" in feature_sets:
+            _models["numeric"] = self._build_rest_submodel(features["train"]["numeric"].shape[1])
 
         # Merge submodels and build main network
 
