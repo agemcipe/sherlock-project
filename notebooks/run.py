@@ -9,7 +9,8 @@ feature_sets = ["char", "word", "par", "rest", "numeric"]
 epochs = 100
 
 X_train, y_train, X_validation, y_validation, X_test, y_test = prepare_gittables(
-    feature_sets
+    feature_sets,
+    recalculate_feature_set=[]
     # feature_sets, recalculate_feature_set=["numeric"]
 )
 feature_set_old = feature_sets.copy().remove("numeric")
@@ -35,6 +36,6 @@ for _model in ["sherlock-full"]:
             y_validation,
             X_test,
             y_test,
-            feature_sets,
+            feature_set,
             epochs,
         )
