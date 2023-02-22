@@ -133,10 +133,11 @@ def extract_features_to_csv(
 
     ensure_path_exists(output_path)
 
+    _extract_features = partial(extract_features, feature_set=feature_set)
+
     with open(output_path, "w") as outfile:
         # Comparable performance with using pool.imap directly, but the code is *much* cleaner
         # for keys, values_str in seq(map(as_py_str, parquet_values)) \
-        extract_features = partial(extract_features, feature_set=feature_set)
 
         for keys, values_str in (
             pseq(
@@ -145,7 +146,7 @@ def extract_features_to_csv(
             .map(to_string_list)
             .map(random_sample)
             .map(normalise_string_whitespace)
-            .map(extract_features)
+            .map(_extract_features)
             .map(numeric_values_to_str)
             .map(drop_keys)
         ):
