@@ -13,7 +13,7 @@ X_train, y_train, X_validation, y_validation, X_test, y_test = prepare_gittables
     recalculate_feature_set=[]
     # feature_sets, recalculate_feature_set=["numeric"]
 )
-feature_set_old = feature_sets.copy().remove("numeric")
+feature_set_old = ["char", "word", "par", "rest"]
 
 for _model in ["sherlock-full"]:
     for feature_set in [feature_sets, feature_set_old, ["numeric"]]:
