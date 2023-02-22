@@ -211,9 +211,6 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
     if recalculate_feature_set:
         if BASE_FEATURES_FILE_PATH.exists() and data_fp.exists():
             print("Recalculating features", recalculate_feature_set)
-            feature_vectors = pd.read_csv(
-                str(BASE_FEATURES_FILE_PATH), dtype=np.float32
-            )
             data = pd.read_csv(data_fp)["values"].astype(str)
 
             _name = "_".join(feature_set)
@@ -226,7 +223,13 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
                 parquet_values=data,
                 feature_set=recalculate_feature_set,
             )
+            _len_data = len(data)
+            del data
+
             new_feature_vectors = pd.read_csv(str(_fp), dtype=np.float32)
+            feature_vectors = pd.read_csv(
+                str(BASE_FEATURES_FILE_PATH), dtype=np.float32
+            )
             _new_cols = [
                 c
                 for c in new_feature_vectors.columns
@@ -236,7 +239,7 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
                 c for c in new_feature_vectors.columns if c in feature_vectors.columns
             ]
 
-            assert len(data) == len(new_feature_vectors) == len(feature_vectors)
+            assert _len_data == len(new_feature_vectors) == len(feature_vectors)
             feature_vectors[_overwrite_cols] = new_feature_vectors[_overwrite_cols]
             feature_vectors = pd.concat(
                 [feature_vectors, new_feature_vectors[_new_cols]], axis=1
