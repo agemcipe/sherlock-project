@@ -210,6 +210,7 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
 
     if recalculate_feature_set:
         if BASE_FEATURES_FILE_PATH.exists() and data_fp.exists():
+            print("Recalculating features", recalculate_feature_set)
             feature_vectors = pd.read_csv(
                 str(BASE_FEATURES_FILE_PATH), dtype=np.float32
             )

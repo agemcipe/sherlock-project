@@ -20,6 +20,7 @@ from sherlock.global_state import is_first, set_first, reset_first
 
 IMPLEMENTED_FEATURES = ["char", "word", "rest", "parvec"]
 
+
 def as_py_str(x):
     return x.as_py() if isinstance(x, pyarrow.lib.StringScalar) else x
 
@@ -48,7 +49,7 @@ def normalise_string_whitespace(col_values: list):
     return list(map(normalise_whitespace, col_values))
 
 
-def extract_features(col_values: list, feature_set = IMPLEMENTED_FEATURES):
+def extract_features(col_values: list, feature_set=IMPLEMENTED_FEATURES):
     features = OrderedDict()
 
     if "char" in feature_set:
@@ -58,7 +59,9 @@ def extract_features(col_values: list, feature_set = IMPLEMENTED_FEATURES):
     if "rest" in feature_set:
         extract_bag_of_words_features(col_values, features, len(col_values))
     if "par" in feature_set:
-        infer_paragraph_embeddings_features(col_values, features, dim=400, reuse_model=True)
+        infer_paragraph_embeddings_features(
+            col_values, features, dim=400, reuse_model=True
+        )
     if "numeric" in feature_set:
         extract_numeric_features(col_values, features)
 
@@ -108,7 +111,9 @@ def ensure_path_exists(output_path):
         os.makedirs(path)
 
 
-def extract_features_to_csv(output_path, parquet_values, feature_set = IMPLEMENTED_FEATURES):
+def extract_features_to_csv(
+    output_path, parquet_values, feature_set=IMPLEMENTED_FEATURES
+):
     verify_keys = False
     first_keys = None
     i = 0
@@ -131,6 +136,8 @@ def extract_features_to_csv(output_path, parquet_values, feature_set = IMPLEMENT
     with open(output_path, "w") as outfile:
         # Comparable performance with using pool.imap directly, but the code is *much* cleaner
         # for keys, values_str in seq(map(as_py_str, parquet_values)) \
+        extract_features = partial(extract_features, feature_set=feature_set)
+
         for keys, values_str in (
             pseq(
                 map(as_py_str, parquet_values), processes=core_count, partition_size=100
@@ -138,7 +145,7 @@ def extract_features_to_csv(output_path, parquet_values, feature_set = IMPLEMENT
             .map(to_string_list)
             .map(random_sample)
             .map(normalise_string_whitespace)
-            .map(extract_features, feature_set = feature_set)
+            .map(extract_features)
             .map(numeric_values_to_str)
             .map(drop_keys)
         ):
