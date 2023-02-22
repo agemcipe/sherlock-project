@@ -18,7 +18,7 @@ from sherlock.features.numeric import extract_numeric_features
 from sherlock.features.helpers import literal_eval_as_str, keys_to_csv
 from sherlock.global_state import is_first, set_first, reset_first
 
-IMPLEMENTED_FEATURES = ["char", "word", "rest", "parvec"]
+IMPLEMENTED_FEATURES = ["char", "word", "rest", "par", "numeric"]
 
 
 def as_py_str(x):

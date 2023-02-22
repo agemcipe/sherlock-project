@@ -4,9 +4,9 @@ import tensorflow as tf
 
 from sklearn.preprocessing import LabelEncoder
 
-IMPLEMENTED_FEATURE_SETS = ["char", "word", "par", "rest"]
+from sherlock.functional import IMPLEMENTED_FEATURES
 
-def categorize_features(feature_sets = IMPLEMENTED_FEATURE_SETS) -> dict:
+def categorize_features(feature_sets=IMPLEMENTED_FEATURES) -> dict:
     """Get feature identifiers per feature set, to map features to feature sets.
 
     Returns
@@ -14,11 +14,11 @@ def categorize_features(feature_sets = IMPLEMENTED_FEATURE_SETS) -> dict:
     feature_cols_dict
         Dictionary with lists of feature identifiers per feature set.
     """
-    if not set(feature_sets).issubset(IMPLEMENTED_FEATURE_SETS):
+    if not set(feature_sets).issubset(IMPLEMENTED_FEATURES):
         raise ValueError(
             f"Feature sets {feature_sets} not implemented. "
-            f"Implemented feature sets are {IMPLEMENTED_FEATURE_SETS}."
-        )    
+            f"Implemented feature sets are {IMPLEMENTED_FEATURES}."
+        )
 
     feature_cols_dict = {}
     for feature_set in feature_sets:

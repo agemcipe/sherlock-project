@@ -17,6 +17,8 @@ from tensorflow.keras.layers import (
 from tensorflow.keras.models import Model, model_from_json
 
 from sherlock.deploy import helpers
+from sherlock.functional import IMPLEMENTED_FEATURES
+
 
 class SherlockModel:
     def __init__(self):
@@ -27,12 +29,20 @@ class SherlockModel:
         self.model_files_directory = "../model_files/"
 
     def fit(
-        self, X_train: pd.DataFrame, y_train, X_val: pd.DataFrame, y_val, model_id: str, active_run: mlflow.ActiveRun = None, feature_sets: list = helpers.IMPLEMENTED_FEATURE_SETS, epochs: int = 100
+        self,
+        X_train: pd.DataFrame,
+        y_train,
+        X_val: pd.DataFrame,
+        y_val,
+        model_id: str,
+        active_run: mlflow.ActiveRun = None,
+        feature_sets: list = IMPLEMENTED_FEATURES,
+        epochs: int = 100,
     ):
         if active_run:
             mlflow.set_tag("model_id", model_id)
             mlflow.tensorflow.autolog()
-            
+
         if model_id == "sherlock":
             raise ValueError(
                 "`model_id` cannot be `sherlock` to avoid overwriting the original model weights."
@@ -43,7 +53,7 @@ class SherlockModel:
         encoder.fit(y_train)
 
         feature_cols = helpers.categorize_features(feature_sets)
-        
+
         features = {"train": {}, "val": {}}
 
         if "char" in feature_sets:
@@ -70,18 +80,25 @@ class SherlockModel:
 
         callbacks = [EarlyStopping(monitor="val_loss", patience=5)]
 
-        _models = {
-        }
+        _models = {}
         if "char" in feature_sets:
-            _models["char"] = self._build_char_submodel(features["train"]["char"].shape[1]) # tuple
+            _models["char"] = self._build_char_submodel(
+                features["train"]["char"].shape[1]
+            )  # tuple
         if "word" in feature_sets:
-            _models["word"] = self._build_word_submodel(features["train"]["word"].shape[1])
+            _models["word"] = self._build_word_submodel(
+                features["train"]["word"].shape[1]
+            )
         if "par" in feature_sets:
             _models["par"] = self._build_par_submodel(features["train"]["par"].shape[1])
         if "rest" in feature_sets:
-            _models["rest"] = self._build_rest_submodel(features["train"]["rest"].shape[1])
+            _models["rest"] = self._build_rest_submodel(
+                features["train"]["rest"].shape[1]
+            )
         if "numeric" in feature_sets:
-            _models["numeric"] = self._build_rest_submodel(features["train"]["numeric"].shape[1])
+            _models["numeric"] = self._build_rest_submodel(
+                features["train"]["numeric"].shape[1]
+            )
 
         # Merge submodels and build main network
 
@@ -89,7 +106,9 @@ class SherlockModel:
         if len(feature_sets) == 1:
             merged_model1 = _models[feature_sets[0]][1]
         else:
-            merged_model1 = concatenate([_models[feature][1] for feature in feature_sets])
+            merged_model1 = concatenate(
+                [_models[feature][1] for feature in feature_sets]
+            )
 
         merged_model_output = self._add_main_layers(merged_model1, num_classes)
 
@@ -105,14 +124,26 @@ class SherlockModel:
         )
 
         if active_run:
-            mlflow.log_param("train_cols", sum(len(X_train[feature_cols[feature]].columns) for feature in feature_sets))
-            mlflow.log_param("val_cols", sum(len(X_val[feature_cols[feature]].columns) for feature in feature_sets))
-            
+            mlflow.log_param(
+                "train_cols",
+                sum(
+                    len(X_train[feature_cols[feature]].columns)
+                    for feature in feature_sets
+                ),
+            )
+            mlflow.log_param(
+                "val_cols",
+                sum(
+                    len(X_val[feature_cols[feature]].columns)
+                    for feature in feature_sets
+                ),
+            )
+
         model.fit(
             [features["train"][feature].values for feature in feature_sets],
             y_train_cat,
             validation_data=(
-            [features["val"][feature].values for feature in feature_sets],
+                [features["val"][feature].values for feature in feature_sets],
                 y_val_cat,
             ),
             callbacks=callbacks,
@@ -124,7 +155,12 @@ class SherlockModel:
 
         _ = helpers._get_categorical_label_encodings(y_train, y_val, model_id)
 
-    def predict(self, X: pd.DataFrame, model_id: str = "sherlock", feature_sets = helpers.IMPLEMENTED_FEATURE_SETS) -> np.array:
+    def predict(
+        self,
+        X: pd.DataFrame,
+        model_id: str = "sherlock",
+        feature_sets=IMPLEMENTED_FEATURES,
+    ) -> np.array:
         """Use sherlock model to generate predictions for X.
 
         Parameters
@@ -143,7 +179,12 @@ class SherlockModel:
 
         return y_pred_classes
 
-    def predict_proba(self, X: pd.DataFrame, model_id: str = "sherlock", feature_sets = helpers.IMPLEMENTED_FEATURE_SETS) -> np.array:
+    def predict_proba(
+        self,
+        X: pd.DataFrame,
+        model_id: str = "sherlock",
+        feature_sets=IMPLEMENTED_FEATURES,
+    ) -> np.array:
         """Use sherlock model to generate predictions for X.
 
         Parameters
@@ -157,7 +198,7 @@ class SherlockModel:
         -------
         Array with predictions for X.
         """
-        feature_cols_dict = helpers.categorize_features(feature_sets = feature_sets )
+        feature_cols_dict = helpers.categorize_features(feature_sets=feature_sets)
 
         y_pred = self.model.predict(
             [X[feature_cols_dict[feature_set]] for feature_set in feature_sets]
@@ -287,7 +328,6 @@ class SherlockModel:
         return par_model_input, par_model4
 
     def _build_rest_submodel(self, rest_shape):
-
         # Build submodel for remaining features
         rest_model_input = Input(shape=(rest_shape,))
         rest_model1 = BatchNormalization(axis=1)(rest_model_input)
