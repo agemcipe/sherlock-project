@@ -6,24 +6,35 @@ MODEL_ID = ["sherlock-full", "sherlock-no-age", "sherlock-small"][0]
 
 experiment_name = ["sherlock-base", "test"][0]
 feature_sets = ["char", "word", "par", "rest", "numeric"]
-epochs = 1
+epochs = 100
 
 X_train, y_train, X_validation, y_validation, X_test, y_test = prepare_gittables(
     feature_sets
     # feature_sets, recalculate_feature_set=["numeric"]
 )
+feature_set_old = feature_sets.copy().remove("numeric")
 
-model_id = MODEL_ID + "__" + "all"
-print(model_id)
-model, X_test, y_test = train_sherlock(
-    model_id,
-    experiment_name,
-    X_train,
-    y_train,
-    X_validation,
-    y_validation,
-    X_test,
-    y_test,
-    feature_sets,
-    epochs,
-)
+for _model in ["sherlock-full"]:
+    for feature_set in [feature_sets, feature_set_old, ["numeric"]]:
+        if feature_set == feature_sets:
+            _name = "all"
+        elif feature_set == feature_set_old:
+            _name = "all-no-numeric"
+        else:
+            _name = "_".join(feature_set)
+
+        model_id = _model + "__" + _name
+
+        print(model_id)
+        model, X_test, y_test = train_sherlock(
+            model_id,
+            experiment_name,
+            X_train,
+            y_train,
+            X_validation,
+            y_validation,
+            X_test,
+            y_test,
+            feature_sets,
+            epochs,
+        )
