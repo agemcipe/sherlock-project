@@ -9,7 +9,8 @@ feature_sets = ["char", "word", "par", "rest", "numeric"]
 epochs = 1
 
 X_train, y_train, X_validation, y_validation, X_test, y_test = prepare_gittables(
-    feature_sets, recalculate_feature_set=["numeric"]
+    feature_sets
+    # feature_sets, recalculate_feature_set=["numeric"]
 )
 
 model_id = MODEL_ID + "__" + "all"
