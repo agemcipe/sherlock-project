@@ -231,7 +231,9 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
 
             print("Done Calculating new features")
             print("Merging new features with old features")
-            new_feature_vectors = pd.read_csv(str(_fp), dtype=np.float32)
+            new_feature_vectors = pd.read_csv(
+                str(_fp), dtype=np.float32, skip_blank_lines=False
+            )
             feature_vectors = pd.read_csv(
                 str(BASE_FEATURES_FILE_PATH), dtype=np.float32
             )

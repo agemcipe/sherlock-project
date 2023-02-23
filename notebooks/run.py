@@ -9,9 +9,7 @@ feature_sets = ["char", "word", "par", "rest", "numeric"]
 epochs = 100
 
 X_train, y_train, X_validation, y_validation, X_test, y_test = prepare_gittables(
-    feature_sets,
-    recalculate_feature_set=[]
-    # feature_sets, recalculate_feature_set=["numeric"]
+    feature_sets, recalculate_feature_set=["numeric"]
 )
 feature_set_old = ["char", "word", "par", "rest"]
 
