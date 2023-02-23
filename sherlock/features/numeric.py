@@ -19,11 +19,6 @@ def match_numeric_regex(array):
 
 
 # %%
-test = ["1232.123 Test", "noMatch", "1232", "9999e-9"]
-col_values = ["165285.0", "-247701.0", "79633.0", "0.0"]
-
-
-# %%
 def extract_numeric_features(col_values: List[str], features: OrderedDict):
     # values that can be converted to numeric
 

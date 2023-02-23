@@ -218,30 +218,34 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
                 batch_id=f"_{_name}"
             )
 
-            if not _fp.exists():
-                print("Warning", _fp, "already exists. Deleting...")
+            if _fp.exists():
+                print("Warning", _fp, "already exists. Overwriting...")
 
-                extract_features_to_csv(
-                    output_path=str(_fp),
-                    parquet_values=data,
-                    feature_set=recalculate_feature_set,
-                )
+            extract_features_to_csv(
+                output_path=str(_fp),
+                parquet_values=data,
+                feature_set=recalculate_feature_set,
+            )
             _len_data = len(data)
             del data
 
-            print("Reading new features")
+            print("Done Calculating new features")
+            print("Merging new features with old features")
             new_feature_vectors = pd.read_csv(str(_fp), dtype=np.float32)
             feature_vectors = pd.read_csv(
                 str(BASE_FEATURES_FILE_PATH), dtype=np.float32
             )
+
             _new_cols = [
                 c
                 for c in new_feature_vectors.columns
                 if c not in feature_vectors.columns
             ]
+            print("New Columns", _new_cols)
             _overwrite_cols = [
                 c for c in new_feature_vectors.columns if c in feature_vectors.columns
             ]
+            print("Existing Columns (will be overwritten)", _overwrite_cols)
 
             assert _len_data == len(new_feature_vectors) == len(feature_vectors)
             feature_vectors[_overwrite_cols] = new_feature_vectors[_overwrite_cols]

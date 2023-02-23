@@ -16,7 +16,7 @@ X_train, y_train, X_validation, y_validation, X_test, y_test = prepare_gittables
 feature_set_old = ["char", "word", "par", "rest"]
 
 for _model in ["sherlock-full"]:
-    for feature_set in [feature_sets, feature_set_old, ["numeric"]]:
+    for feature_set in [["numeric"]]:
         if feature_set == feature_sets:
             _name = "all"
         elif feature_set == feature_set_old:
