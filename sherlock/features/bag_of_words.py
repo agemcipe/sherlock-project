@@ -57,9 +57,6 @@ def extract_bag_of_words_features(col_values: list, features: OrderedDict, n_val
     text_cell_nz_count, text_char_counts = count_pattern_in_cells_with_non_zero_count(
         col_values, TEXT_PATTERN
     )
-    
-    # pd.Series(map(lambda x: x.replace(r"\D", ""), col_values)
-    # values that after removing all non-numeric characters are still numeric
 
     features["frac_numcells"] = numeric_cell_nz_count / n_val
     features["frac_textcells"] = text_cell_nz_count / n_val
@@ -67,33 +64,6 @@ def extract_bag_of_words_features(col_values: list, features: OrderedDict, n_val
     # Average + std number of numeric tokens in cells
     features["avg_num_cells"] = np.mean(numeric_char_counts)
     features["std_num_cells"] = np.std(numeric_char_counts)
-
-    # values that can be converted to numeric
-    pure_numeric_values = pd.to_numeric(col_values, errors='coerce') 
-
-    # statistics of numeric values
-    pure_numeric_values = pure_numeric_values[~pd.isna(pure_numeric_values)] 
-
-    if len(pure_numeric_values) > 0: 
-        features["avg_numeric_values"] = np.mean(pure_numeric_values)
-        features["std_numeric_values"] = np.std(pure_numeric_values)
-        features["min_numeric_values"] = np.min(pure_numeric_values)
-        features["max_numeric_values"] = np.max(pure_numeric_values)
-        features["median_numeric_values"] = np.median(pure_numeric_values)
-        features["sum_numeric_values"] = np.sum(pure_numeric_values)
-        features["var_numeric_values"] = np.var(pure_numeric_values)
-        features["iqr_numeric_values"] = np.subtract(*np.percentile(pure_numeric_values, [75, 25]))
-    
-    else:
-        # TODO: impute with gloabal statistics
-        features["avg_numeric_values"] = 0
-        features["std_numeric_values"] = 0
-        features["min_numeric_values"] = 0
-        features["max_numeric_values"] = 0
-        features["median_numeric_values"] = 0
-        features["sum_numeric_values"] = 0
-        features["var_numeric_values"] = 0
-        features["iqr_numeric_values"] = 0
 
 
     # Average + std number of textual tokens in cells

@@ -5,4 +5,13 @@
 3	median_numeric_values
 3	sum_numeric_values
 3	var_numeric_values
-3	iqr_numeric_values
+4   percentile_10_numeric_values
+4   percentile_20_numeric_values
+4   percentile_30_numeric_values
+4   percentile_40_numeric_values
+4   percentile_50_numeric_values
+4   percentile_60_numeric_values
+4   percentile_70_numeric_values
+4   percentile_80_numeric_values
+4   percentile_90_numeric_values
+4   percentile_100_numeric_values
