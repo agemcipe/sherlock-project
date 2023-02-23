@@ -17,7 +17,6 @@ def match_numeric_regex(array):
 
     return [tuple(map(lambda x: x.strip(), m.groups())) for m in it if m is not None]
 
-
 # %%
 def extract_numeric_features(col_values: List[str], features: OrderedDict):
     # values that can be converted to numeric

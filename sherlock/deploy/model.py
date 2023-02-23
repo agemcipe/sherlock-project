@@ -96,7 +96,7 @@ class SherlockModel:
                 features["train"]["rest"].shape[1]
             )
         if "numeric" in feature_sets:
-            _models["numeric"] = self._build_rest_submodel(
+            _models["numeric"] = self._build_word_submodel(
                 features["train"]["numeric"].shape[1]
             )
 
