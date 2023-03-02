@@ -12,10 +12,27 @@ NUMBER_REGEX_WITH_UNITS = re.compile(
 )
 
 
+def normalize_list(arr):
+    max_value = np.nanmax(arr)
+    min_value = np.nanmin(arr)
+    # todo inf
+    if (
+        max_value - min_value == 0
+        or np.isnan(max_value)
+        or np.isnan(min_value)
+        or np.isinf(max_value)
+        or np.isinf(min_value)
+    ):
+        return arr
+    arr = (arr - min_value) / (max_value - min_value)
+    return arr
+
+
 def match_numeric_regex(array):
     it = map(lambda x: (re.match(NUMBER_REGEX_WITH_UNITS, x)), array)
 
     return [tuple(map(lambda x: x.strip(), m.groups())) for m in it if m is not None]
+
 
 # %%
 def extract_numeric_features(col_values: List[str], features: OrderedDict):
@@ -38,10 +55,11 @@ def extract_numeric_features(col_values: List[str], features: OrderedDict):
     # TODO deal with very large numbers
     # TODO deal with ordering of numbers
 
-    MAX_VALUE = 100_000_000  # TODO decide
+    MAX_VALUE = 100_000_000_000  # TODO decide
     pure_numeric_values = np.clip(
         pure_numeric_values[~pd.isna(pure_numeric_values)], -MAX_VALUE, MAX_VALUE
     )  # necessary for model loss to not be nan
+    pure_numeric_values = normalize_list(pure_numeric_values)
 
     _lin_space = np.linspace(0, 100, 11)
     if len(pure_numeric_values) > 2:
