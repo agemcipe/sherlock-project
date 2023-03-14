@@ -18,7 +18,7 @@ from sherlock.features.preprocessing import (
 from sherlock.features.word_embeddings import initialise_word_embeddings
 from sklearn.model_selection import train_test_split
 
-from sherlock.helpers import DATA_DIR
+from sherlock.helpers import BASE_DATA_DIR
 
 
 # %%
@@ -26,7 +26,7 @@ PROCESSED_DATA_ID = "full_numeric_features"
 
 
 def get_processed_data_dir(
-    base_path: pathlib.Path = DATA_DIR, processed_data_id: str = PROCESSED_DATA_ID
+    base_path: pathlib.Path, processed_data_id: str = PROCESSED_DATA_ID
 ):
     PROCESSED_DATA_DIR = base_path / "processed" / processed_data_id
     if PROCESSED_DATA_DIR.exists():
@@ -158,15 +158,43 @@ def split_data(data, targets, test_size=0.1, random_state=41, store_fp=None):
     return X_train, y_train, X_validation, y_validation, X_test, y_test
 
 
-def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
+def calculate_features(data_csv, output_path, feature_set=IMPLEMENTED_FEATURES):
+    """Calculate features for data and targets.
+
+    Parameters
+    ----------
+    data_csv : str
+        _description_
+    target_csv : str
+        _description_
+
+    Returns
+    -------
+    tuple
+        _description_
+    """
+    data = pd.read_csv(data_csv, header=None, names=["data"])
+    data = data["data"].astype(str).tolist()
+
+    extract_features_to_csv(
+        output_path=str(output_path),
+        parquet_values=data,
+        feature_set=feature_set,
+    )
+    feature_df = pd.read_csv(str(output_path), dtype=np.float32)
+    return feature_df
+
+
+def main(
+    feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[], data_id="gittables"
+):
     prepare_feature_extraction()
     initialise_word_embeddings()
     initialise_pretrained_model(400)
     initialise_nltk()
-
-    ont_file = DATA_DIR / "dbpedia_semantic_types_filtered_1000.csv"
-    index_file = DATA_DIR / "mapping_column_name_semantic_type.csv"
-    processed_data_dir = get_processed_data_dir()
+    DATA_DIR = BASE_DATA_DIR / data_id
+    assert DATA_DIR.exists()
+    processed_data_dir = get_processed_data_dir(base_path=DATA_DIR)
 
     resulting_files = [
         processed_data_dir / f"X_train.parquet",
@@ -188,16 +216,21 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
             pd.read_parquet(resulting_files[5])["label"].values,
         ]
 
-    ont_df = pd.read_csv(ont_file)
-    index_df = pd.read_csv(index_file)
-    index_df = index_df[index_df["dbpedia_semantic"].isin(ont_df["id"])]
+    if data_id == "gittables":
+        ont_file = DATA_DIR / "dbpedia_semantic_types_filtered_1000.csv"
+        index_file = DATA_DIR / "mapping_column_name_semantic_type.csv"
+        ont_df = pd.read_csv(ont_file)
+        index_df = pd.read_csv(index_file)
+        index_df = index_df[index_df["dbpedia_semantic"].isin(ont_df["id"])]
 
-    _local_dirs = [d.name for d in (DATA_DIR / "unzipped").glob("*")]
-    if _local_dirs:
-        _index_df = index_df[index_df["file_name"].str.startswith(tuple(_local_dirs))]
-    else:
-        print("No local dirs found")
-        raise FileNotFoundError()
+        _local_dirs = [d.name for d in (DATA_DIR / "unzipped").glob("*")]
+        if _local_dirs:
+            _index_df = index_df[
+                index_df["file_name"].str.startswith(tuple(_local_dirs))
+            ]
+        else:
+            print("No local dirs found")
+            raise FileNotFoundError()
 
     data_fp = processed_data_dir / f"data.csv"
     targets_fp = processed_data_dir / f"targets.csv"
@@ -264,25 +297,34 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
     if not BASE_FEATURES_FILE_PATH.exists():
         if data_fp.exists() and targets_fp.exists():
             print("Loading data and targets from parquet files...")
-            data = pd.read_csv(data_fp)["values"].astype(str)
+            data = pd.read_csv(data_fp, header=None, names=["values"])["values"].astype(
+                str
+            )
             targets = pd.read_csv(targets_fp)
         else:
             print("Loading data and targets from individual parquet files...")
-            data, targets = get_data_and_targets(_index_df.reset_index(), n=100_000_000)
+            if data_id == "gittables":
+                data, targets = get_data_and_targets(
+                    _index_df.reset_index(), n=100_000_000
+                )
 
-            data = pd.Series(data, name="values")
-            targets = pd.Series(targets, name="labels")
+                data = pd.Series(data, name="values")
+                targets = pd.Series(targets, name="labels")
 
-            targets_fil_count = targets.value_counts()[
-                targets.value_counts() > LEAST_TARGET_COUNT
-            ].index
+                targets_fil_count = targets.value_counts()[
+                    targets.value_counts() > LEAST_TARGET_COUNT
+                ].index
 
-            idx = targets[targets.isin(targets_fil_count)].index
-            targets = targets[idx]
-            data = data[idx]
+                idx = targets[targets.isin(targets_fil_count)].index
+                targets = targets[idx]
+                data = data[idx]
 
-            data.to_csv(data_fp, index=False)
-            targets.to_csv(targets_fp, index=False)
+                data.to_csv(data_fp, index=False)
+                targets.to_csv(targets_fp, index=False)
+            else:
+                raise NotImplementedError(
+                    f"Extracting raw data not Implemented for {data_id}"
+                )
 
         assert len(data) == len(targets)
 
@@ -316,7 +358,7 @@ def main(feature_set=IMPLEMENTED_FEATURES, recalculate_feature_set=[]):
                 # remove batch file
                 _fp.unlink()
 
-    targets = pd.read_csv(targets_fp)["labels"].values
+    targets = pd.read_csv(targets_fp, header=None, names=["labels"])["labels"].values
     feature_vectors = pd.read_csv(str(BASE_FEATURES_FILE_PATH), dtype=np.float32)
 
     print("Length of feature vectors:", len(feature_vectors))

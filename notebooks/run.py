@@ -1,14 +1,14 @@
 # run sherlock on gittabes
-from prepare_gittables import main as prepare_gittables
+from prepare_gittables import main as prepare
 from train_sherlock import main as train_sherlock
 
 MODEL_ID = ["sherlock-full", "sherlock-no-age", "sherlock-small"][0]
-
+DATA_ID = "SportsTables"
 experiment_name = ["sherlock-base", "test"][0]
 feature_sets = ["char", "word", "par", "rest", "numeric"]
 epochs = 100
 
-X_train, y_train, X_validation, y_validation, X_test, y_test = prepare_gittables(
+X_train, y_train, X_validation, y_validation, X_test, y_test = prepare(
     feature_sets, recalculate_feature_set=[]
 )
 feature_set_old = ["char", "word", "par", "rest"]
